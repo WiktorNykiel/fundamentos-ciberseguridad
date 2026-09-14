@@ -22,6 +22,6 @@ Las salidas de administración pueden contener usuarios, rutas, direcciones y no
 
 Actividad fuera del rango autorizado; aparición de datos reales inesperados; pérdida de acceso administrativo o recuperación; efecto sobre el anfitrión; degradación de otra VM; exposición exterior; comportamiento no comprendido de un script. Parar, preservar lo ya observado y escalar al docente. Se valora la parada justificada como competencia, no como fracaso.
 
-## Reserva de distribución
+## Distribución pública y material reservado
 
-Repositorio privado y sin nuevas invitaciones. Las soluciones del docente deben separarse en permisos o en un repositorio diferente antes de distribuir materiales a alumnos: una carpeta en el mismo repositorio no constituye una frontera de acceso.
+Este repositorio es público. Los exámenes reservados, las soluciones que no deban distribuirse, los expedientes y las evidencias personales se conservan fuera de él, con permisos reales. Una carpeta o una rama dentro del repositorio público no constituye una frontera de acceso. Las autoevaluaciones del campus son formativas y sus respuestas son públicas; no deben reutilizarse como un examen secreto.
