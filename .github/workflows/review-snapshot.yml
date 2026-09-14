@@ -1,0 +1,44 @@
+name: Dependency integration review snapshot
+on:
+  push:
+    branches: [maintenance/review-integration-20260915]
+    paths: [.github/workflows/review-snapshot.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Collect sources and exact PR diffs without executing their code
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review-snapshot
+          git archive HEAD > review-snapshot/base.tar
+          for pr in 1 4 5 6 10 11 12 13 14 15 16; do
+            git fetch --no-tags origin "refs/pull/${pr}/head:refs/review/${pr}"
+            sha=$(git rev-parse "refs/review/${pr}")
+            base=$(git merge-base HEAD "$sha")
+            printf '%s %s %s\n' "$pr" "$sha" "$base" >> review-snapshot/heads.txt
+            git diff --name-only "$base" "$sha" > "review-snapshot/pr-${pr}-files.txt"
+            if grep -v -E '^(package.json|package-lock.json)$' "review-snapshot/pr-${pr}-files.txt"; then
+              echo "Unexpected scope in PR ${pr}; stop review" >&2
+              exit 1
+            fi
+            git diff "$base" "$sha" -- package.json package-lock.json > "review-snapshot/pr-${pr}.patch"
+            git show "${sha}:package.json" > "review-snapshot/pr-${pr}-package.json"
+            git show "${sha}:package-lock.json" > "review-snapshot/pr-${pr}-lock.json"
+            git show "${base}:package-lock.json" > "review-snapshot/pr-${pr}-base-lock.json"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependency-review-snapshot
+          path: review-snapshot/
+          retention-days: 7
+          if-no-files-found: error
