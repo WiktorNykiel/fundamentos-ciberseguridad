@@ -35,12 +35,17 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          npm audit --omit=dev --audit-level=high --json | tee dependency-audit.json
-      - name: Retain audit report
+          npm audit --omit=dev --audit-level=high --json | tee dependency-audit-production.json
+      - name: Audit development and production dependencies
+        shell: bash
+        run: |
+          set -o pipefail
+          npm audit --audit-level=high --json | tee dependency-audit-all.json
+      - name: Retain audit reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: legacy-dependency-audit
-          path: dependency-audit.json
+          path: dependency-audit-*.json
           retention-days: 7
           if-no-files-found: warn
