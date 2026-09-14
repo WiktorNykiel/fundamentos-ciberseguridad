@@ -1,27 +1,33 @@
 # Estado, validación y mantenimiento
 
-Edición curricular 1.0, fecha 2026-09-14. Temario y laboratorios diseñados en Markdown. No se afirma haber ejecutado los 96 laboratorios ni desplegado imágenes, servicios o clústeres durante la redacción. Las prácticas requieren validación docente sobre los sistemas concretos.
+Edición **1.1**, 2026-09-14. El diseño curricular se conserva y se añade un kit ejecutable sobre datos sintéticos. Las pruebas de código y la ejecución completa de una práctica nativa son evidencias diferentes.
+
+## Evidencias disponibles
+
+El [informe de pruebas](qa/RESULTADOS.md) registra 42 pruebas del kit y del servidor HTTP local, más ocho de planificación. Se ejecutaron en Linux con Python 3.13.5 y Bash 5.2.37. La sintaxis Bash también se comprobó. Los archivos de resultados y sus límites se conservan con el material.
+
+**No se ejecutaron Windows/CMD/BAT/PowerShell, macOS/zsh, Docker, Compose ni Swarm.** Sus ejemplos y manifiestos son material preparado para validación posterior. No se utilizaron modelos de IA ni se hicieron consultas a indicadores externos para probar el kit.
+
+No se afirma que los 96 laboratorios estén realizados, ni que la formación completa esté validada para una cohorte. La resolución de funciones offline, una prueba HTTP y el análisis de un ejemplo no acreditan administración nativa, adquisición forense o un despliegue seguro en producción.
 
 ## Coherencia de carga
 
-30 módulos de 14 horas, uno de 20 y otro de 40: 480 horas. Teoría: 30 × 5 + 8 + 10 = 168 horas. Práctica: 30 × 9 + 12 + 30 = 312 horas. Tres laboratorios por módulo: 96 diseños. El capstone tiene tres fases prácticas incluidas, no adicionales.
+30 módulos de 14 h, uno de 20 h y otro de 40 h: 480 h. Teoría 168 h; práctica 312 h. La planificación verifica 240 sesiones y 96 laboratorios con minutos asignados. Los ocho runbooks desarrollan laboratorios existentes, sin incrementar duración ni atribuir dominio adicional.
 
-## Comprobaciones documentales
+## Registro antes de impartir
 
-Identificadores, prerrequisitos, objetivos, horas, entregables, criterios de éxito y recuperación; existencia de referencias internas; distinción entre diseño y ejecución; ausencia de datos privados; conservación del ámbito del directorio del curso; compatibilidad declarada por plataforma.
+Por laboratorio: ID, fecha, revisor, SO/edición/versión/arquitectura, shell, herramientas, dataset, pasos, resultados, errores, prueba negativa, duración real, permisos, aislamiento, recuperación y dictamen. Windows/macOS requieren equipo nativo para validar sus controles; una captura o parser en otro SO debe etiquetarse como análisis offline.
 
-## Registro de prueba por laboratorio
+Estados: diseñado; revisado documentalmente; implementación parcial probada; probado en entorno nativo identificado; aprobado para cohorte; bloqueado; retirado. No cambiar de estado por actualizar fecha o tener un test de sintaxis.
 
-ID, fecha, revisor, SO/edición/versión/arquitectura, shell, herramientas, datos iniciales, pasos, resultados, errores, prueba negativa, duración, permisos, aislamiento, recuperación y dictamen. El registro comienza sin pruebas realizadas y se completa solo con ejecuciones reales.
+## Límites de seguridad
 
-Estados: diseñado; revisado documentalmente; probado en entorno identificado; aprobado para cohorte; bloqueado; retirado. Cambiar la fecha de un documento no cambia automáticamente su estado de prueba.
+El marcador del workspace evita errores accidentales de alcance, pero no acredita procedencia o autorización ni crea una sandbox contra un adversario. Las herramientas están orientadas a archivos pequeños, sintéticos, estáticos y bajo control del alumno. No son un colector forense ni un analizador hostil de producción.
 
-## Criterios de bloqueo
+Los scripts nativos son ejemplos didácticos de alcance menor que el validador Python. BAT mantiene limitaciones explícitas de parsing y errores. El servicio HTTP no sirve archivos arbitrarios, pero carece de autenticación/TLS y no debe exponerse fuera del laboratorio. La imagen base debe revisarse y fijarse por digest autorizado antes de una cohorte que utilice Docker.
 
-Herramienta o procedencia no verificable; función ausente en la edición; falta de recuperación; privilegios injustificados; datos reales no autorizados; impacto sobre anfitrión; conflicto de licencia; resultado no reproducible. Registrar alternativa o limitación antes de impartir.
+## Bloqueo y mantenimiento
 
-## Mantenimiento
+Bloquear una práctica si falta licencia, función nativa, recuperación o procedencia verificable; si exige privilegios injustificados, datos reales o desactivación de protección; si afecta al anfitrión; o si el resultado no es reproducible. Registrar alternativa y no dar por superada la competencia afectada.
 
-Revisar documentación oficial, soporte y licencias antes de cada cohorte y después de cambios materiales de versión. Mantener historial de cambios, módulos afectados y evidencias de prueba. Reproducibilidad no significa conservar indefinidamente una versión sin actualizar.
-
-La distribución permanece privada. Antes de una eventual publicación, revisar contenido e historial, derechos, privacidad, soluciones del docente, enlaces y estado de pruebas. El curso no otorga por sí mismo acreditación oficial ni demuestra experiencia profesional.
+Mantener changelog, versiones, evidencia de pruebas y revisión de soporte. Ante una actualización, repetir las comprobaciones afectadas; una versión fijada necesita mantenimiento. Antes de compartir, revisar datos e historial, derechos y separación de soluciones/expedientes. Esta edición sigue privada y no constituye certificación oficial.

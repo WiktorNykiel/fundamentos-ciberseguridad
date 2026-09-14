@@ -1,20 +1,25 @@
 # Sistemas operativos, administración y ciberseguridad
 
-**Autor y responsable editorial: Wiktor Nykiel.** Edición curricular 1.0 · 14 de septiembre de 2026 · Español · Distribución privada.
+**Wiktor Nykiel · Edición 1.1 · Español · Distribución privada · 14 de septiembre de 2026.**
 
-Programa independiente, desde iniciación hasta administración intermedia-avanzada. Linux, Windows y macOS se trabajan como sistemas reales, no como comandos intercambiables. El hilo conductor es construir, operar, proteger, automatizar e investigar una pequeña infraestructura, documentando cada decisión.
+Programa independiente para aprender a comprender, operar, proteger, automatizar e investigar sistemas Linux, Windows y macOS. Se comienza con archivos, terminal y funcionamiento del SO; se termina integrando administración, evidencias, recuperación y comunicación. Predomina la terminal, con GUI para comprender y contrastar resultados.
 
-## Empezar
+## Empezar por una actividad real
 
-1. Leer [el plan docente](PLAN-DOCENTE.md) y realizar el diagnóstico inicial.
-2. Preparar [el laboratorio](LABORATORIO.md), aprobar sus controles de aislamiento y registrar las versiones.
-3. Recorrer los módulos en orden y entregar los laboratorios identificados como `L01A` a `L32C`.
-4. Consultar [las equivalencias](REFERENCIA-CRUZADA.md), [las guías de terminal](CHEATSHEETS.md), [las rúbricas](EVALUACION.md) y [las plantillas](PLANTILLAS.md).
-5. Defender [el proyecto final](CAPSTONE.md) con funcionamiento, recuperación y evidencias, no solo capturas.
+Abrir [Inicio rápido](INICIO-RAPIDO.md), preparar una carpeta sintética y completar [R01: archivos](practicas/R01-archivos.md). Después seguir [el plan docente](PLAN-DOCENTE.md) y [el laboratorio](LABORATORIO.md). El kit es material de apoyo: un alumno inicial no necesita saber Python para utilizar un dataset preparado por el docente.
 
-## Contenido
+| Recurso | Qué contiene |
+|---|---|
+| [Lecciones desarrolladas](lecciones/README.md) | Ocho capítulos con explicación, ejemplos, errores y preguntas de defensa |
+| [Prácticas paso a paso](practicas/README.md) | Ocho runbooks vinculados a laboratorios del programa, con resultados, variantes y recuperación |
+| [Kit ejecutable](kit/README.md) | Datos sintéticos, herramientas offline, ejemplos Bash/BAT/PowerShell/zsh y servicio web de laboratorio |
+| [Planificación verificable](planificacion/README.md) | Catálogo de 32 módulos y generación de 240 sesiones y 96 laboratorios |
+| [Resultados de validación](qa/RESULTADOS.md) | Pruebas ejecutadas, versiones, alcance y limitaciones |
+| [Cambios de esta edición](CHANGELOG.md) | Diferencias entre diseño curricular y material ejecutable añadido |
 
-| Bloque | Módulos | Horas | Documento |
+## Programa completo: 480 horas
+
+| Bloque | Módulos | Horas | Desarrollo curricular |
 |---|---|---:|---|
 | Fundamentos, laboratorio y método | M01–M04 | 56 | [Fundamentos](modulos/01-fundamentos.md) |
 | Linux y Bash | M05–M12 | 112 | [Linux](modulos/02-linux.md) |
@@ -25,33 +30,26 @@ Programa independiente, desde iniciación hasta administración intermedia-avanz
 | Proyecto integrador y defensa | M32 | 40 | [Capstone](CAPSTONE.md) |
 | **Total** | **32** | **480** | **168 de teoría y 312 de práctica** |
 
-Los módulos M01–M30 tienen 14 horas cada uno: 5 de teoría y 9 de práctica. M31 tiene 8+12 y M32 tiene 10+30. Se diseñan **96 laboratorios**, tres por módulo. En M32 son tres fases integradoras. Las horas de trabajo, evaluación y preparación descritas dentro de cada módulo ya están incluidas; no se suman de nuevo.
+Se mantienen los 96 laboratorios diseñados, tres por módulo. Los ocho runbooks nuevos concretan una selección de ellos; no son horas ni laboratorios adicionales. Las rutas abreviadas de 60, 120 y 240 horas siguen definidas en el plan docente, con alcance diferenciado.
 
-## Qué se entrega y qué no se afirma
+## Aprender, comprobar, explicar
 
-Esta edición contiene un temario desarrollado, objetivos medibles, unidades, prácticas diseñadas, herramientas, entregables, criterios de éxito, evaluación, proyecto final y referencias. No es una colección de máquinas virtuales ni una plataforma LMS. Las prácticas nativas de Windows y macOS necesitan su sistema correspondiente. Un contenedor Linux con PowerShell no valida NTFS, Registro, Event Log, WinRM, Active Directory o controles de Apple.
+Cada práctica pide identificar sistema, versión, identidad, directorio y efecto esperado; utilizar privilegios mínimos; conservar datos originales; verificar un resultado positivo y uno negativo; y documentar reversión. Se propone resolver o verificar por CLI al menos el 80 % de las tareas prácticas evaluables, con adaptaciones de accesibilidad.
 
-Los laboratorios son **diseños docentes**, pendientes de ejecución y ajuste por el docente sobre las imágenes concretas de la cohorte. La revisión de documentación no equivale a haber ejecutado todos los comandos ni a una certificación de seguridad. Consultar [validación y mantenimiento](VALIDACION.md).
+Los ejemplos de Bash, BAT, PowerShell y zsh operan sobre el mismo dataset para comparar modelos y límites, no para fingir que los sistemas son iguales. Windows nativo es necesario para Registro, NTFS, Event Log y administración de Windows. macOS nativo es necesario para APFS, launchd, TCC y controles Apple. PowerShell en Linux no sustituye esas comprobaciones.
 
-## Principios
+La perspectiva Red/Purple se trabaja mediante revisión de permisos y superficie, relaciones de confianza, segmentación, pruebas benignas y retest. La investigación utiliza evidencia sintética; no contiene instrucciones de intrusión, evasión ni extracción de credenciales. La IA propone y explica: no ejecuta automáticamente, no recibe secretos y no valida por sí sola sus conclusiones.
 
-Predominio de terminal: al menos el 80 % de las tareas prácticas evaluables se resuelve o verifica mediante CLI. La GUI se utiliza para formar un modelo mental, localizar controles y contrastar resultados. No se penaliza la accesibilidad: puede utilizarse una interfaz equivalente si demuestra la misma competencia.
+## Estado real de esta entrega
 
-Seguridad transversal: mínimo privilegio, cambios reversibles, datos sintéticos, trazabilidad, copias verificadas y separación entre observar y modificar. La formación para Red Team aborda planificación autorizada, análisis de superficie, permisos, segmentación y evaluación de controles. Los conceptos de pivotaje se estudian mediante diagramas y telemetría, no mediante instrucciones para comprometer equipos o eludir controles.
+**50 pruebas automatizadas ejecutadas en Linux: 42 del kit/HTTP local y 8 de planificación**, además de comprobación sintáctica Bash. Los scripts nativos Windows/PowerShell y zsh/macOS están escritos y documentados, pero no ejecutados en sus plataformas. Los manifiestos Docker/Compose/Swarm están preparados, no desplegados ni certificados.
 
-La IA propone y explica; no recibe credenciales, no aprueba sus propias acciones y no ejecuta automáticamente texto obtenido de logs, documentos o Internet.
+No se afirma haber ejecutado los 96 laboratorios completos, ni impartido 480 horas, ni validado una cohorte. El servicio HTTP es exclusivamente didáctico, sin autenticación/TLS y no apto para producción. Consultar [validación](VALIDACION.md) y [resultados](qa/RESULTADOS.md) antes de reutilizarlo.
 
-## Documentación complementaria
+## Material docente y de consulta
 
-- [Matriz de competencias y perfiles](COMPETENCIAS.md).
-- [Banco de preguntas y soluciones orientativas](BANCO-PREGUNTAS.md).
-- [Bastionado y recuperación](BASTIONADO.md).
-- [Fuentes primarias y versiones](FUENTES.md).
-- [Uso responsable](USO-RESPONSABLE.md).
-- [Guía del docente y secuenciación](GUIA-DOCENTE.md).
+[Guía del docente](GUIA-DOCENTE.md) · [Competencias y perfiles](COMPETENCIAS.md) · [Evaluación](EVALUACION.md) · [Banco de preguntas](BANCO-PREGUNTAS.md) · [Equivalencias por sistema](REFERENCIA-CRUZADA.md) · [Guías rápidas](CHEATSHEETS.md) · [Bastionado](BASTIONADO.md) · [Plantillas](PLANTILLAS.md) · [Fuentes](FUENTES.md) · [Uso responsable](USO-RESPONSABLE.md).
 
-## Ubicación y conservación
+Los materiales están autocontenidos en este directorio y no necesitan ejecutar ni modificar la aplicación de la raíz del repositorio. No se activa publicación web, GitHub Pages, nuevos colaboradores o despliegues automáticos. Antes de compartir con alumnos, separar soluciones y expedientes mediante permisos reales: una carpeta no constituye una frontera de acceso.
 
-El curso está autocontenido en este directorio. No modifica ni necesita ejecutar la aplicación que pueda existir en la raíz del repositorio. Puede trasladarse íntegramente a otro repositorio privado conservando sus enlaces relativos. No se habilitan publicación web, GitHub Pages, nuevos colaboradores ni automatizaciones de despliegue.
-
-Los materiales propios permanecen reservados para el titular. Las referencias externas conservan sus licencias y condiciones; no se redistribuyen manuales, benchmarks, instaladores o imágenes de terceros.
+Materiales propios reservados para el titular. Las referencias externas conservan sus licencias; no se redistribuyen instaladores, imágenes o manuales de terceros.
