@@ -1,4 +1,4 @@
-"""Aceptación funcional con Chromium. Se ejecuta contra el curso real compilado."""
+"""Aceptación funcional con Chromium sobre el curso real compilado."""
 import json
 import os
 import re
@@ -23,7 +23,7 @@ class BrowserTests(unittest.TestCase):
             try:
                 with socket.create_connection(('127.0.0.1',cls.port),timeout=.2):break
             except OSError:time.sleep(.1)
-        cls.p=sync_playwright().start();cls.browser=cls.p.chromium.launch(headless=True, executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or None)
+        cls.p=sync_playwright().start();cls.browser=cls.p.chromium.launch(headless=True,executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or None)
         (HERE/'qa/screenshots').mkdir(parents=True,exist_ok=True)
     @classmethod
     def tearDownClass(cls):
@@ -48,6 +48,7 @@ class BrowserTests(unittest.TestCase):
     def test_02_navigation_and_read(self):
         self.goto('#/modulo/M05');self.page.locator('#read-check').check();self.page.reload();self.page.locator('#read-check').wait_for()
         self.assertTrue(self.page.locator('#read-check').is_checked());self.assertTrue(self.state()['modules']['M05']['read'])
+        self.page.screenshot(path=str(HERE/'qa/screenshots/05-lectura.png'),full_page=True)
     def test_03_notes_are_text(self):
         self.goto('#/modulo/M05');self.page.locator('#notes').fill('<img src=x onerror=alert(1)> nota de prueba');self.page.reload();self.page.locator('#notes').wait_for()
         self.assertIn('<img',self.page.locator('#notes').input_value());self.assertEqual(self.page.locator('img[src=x]').count(),0)
@@ -70,6 +71,7 @@ class BrowserTests(unittest.TestCase):
         self.goto('#/modulo/M05');self.page.get_by_role('button',name=re.compile('Modo presentación')).click()
         self.page.locator('#presentation').wait_for(state='visible');first=self.page.locator('#slide-counter').inner_text()
         self.page.keyboard.press('ArrowRight');self.assertNotEqual(self.page.locator('#slide-counter').inner_text(),first)
+        self.assertFalse(self.page.locator('#slide-content > h3').first.is_visible())
         self.page.screenshot(path=str(HERE/'qa/screenshots/02-presentacion.png'))
         self.page.keyboard.press('Escape');self.assertFalse(self.page.locator('#presentation').is_visible())
     def test_08_export_and_reset(self):
@@ -90,7 +92,9 @@ class BrowserTests(unittest.TestCase):
         self.page.locator('#menu-toggle').click();self.page.screenshot(path=str(HERE/'qa/screenshots/04-movil.png'),full_page=True)
     def test_11_resources(self):
         self.goto('#/recursos');self.assertGreater(self.page.locator('.resource-grid a').count(),5)
-        self.page.locator('.resource-grid a').first.click();self.page.locator('.prose').wait_for();self.assertGreater(len(self.page.locator('.prose').inner_text()),100)
+        self.page.locator('.resource-grid a').first.click()
+        article=self.page.locator('#main article.prose');article.wait_for()
+        self.assertGreater(len(article.inner_text()),100)
     def test_12_bad_route(self):
         self.goto('#/modulo/M99');self.assertTrue(self.page.get_by_role('heading',name='No se encontró esa sección').is_visible())
     def test_13_skip_link_preserves_route(self):
@@ -107,4 +111,23 @@ class BrowserTests(unittest.TestCase):
         self.page.once('dialog',lambda d:d.accept())
         self.page.locator('#import-file').set_input_files({'name':'progress.json','mimeType':'application/json','buffer':json.dumps(s).encode()})
         self.page.wait_for_timeout(150);self.assertTrue(self.state()['modules']['M02']['read'])
+    def test_17_internal_reference(self):
+        self.goto('#/modulo/M05');self.page.locator('#theory a[href^="#/recurso/"]').first.click()
+        self.page.locator('#main article.prose').wait_for();self.assertIn('#/recurso/',self.page.url)
+    def test_18_resume(self):
+        self.goto('#/modulo/M05');self.page.locator('#read-check').check();self.goto('#/curso')
+        self.page.get_by_role('link',name=re.compile('Continuar mi recorrido')).click()
+        self.page.locator('#read-check').wait_for();self.assertIn('#/modulo/M05',self.page.url)
+    def test_19_continuous_reading(self):
+        self.page.goto(self.base+'/lectura.html')
+        self.assertEqual(self.page.locator('article[id^=M]').count(),32)
+        self.assertEqual(self.page.locator('article[id^=D]').count(),18)
+        self.assertEqual(self.page.locator('script').count(),0)
+    def test_20_manual_result_check(self):
+        self.goto('#/modulo/M05/practica/L05A')
+        self.page.locator('[data-action=step][data-step="2"]').click()
+        self.page.locator('[name=files]').fill('8');self.page.locator('[name=bytes]').fill('62')
+        self.page.get_by_role('button',name='Contrastar cantidades').click()
+        self.assertIn('Coincide con R01',self.page.locator('#result-feedback').inner_text())
+        self.assertFalse(self.state()['labs']['L05A']['done'])
 if __name__=='__main__':unittest.main(verbosity=2)
