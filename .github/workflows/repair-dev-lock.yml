@@ -1,0 +1,96 @@
+name: Repair reviewed development lockfile
+on:
+  push:
+    branches: [maintenance/review-integration-20260915]
+    paths: [.github/workflows/repair-dev-lock.yml]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Update only reviewed transitive package families
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p lock-review
+          cp package-lock.json lock-review/before.json
+          npm update @babel/core brace-expansion --package-lock-only --ignore-scripts --no-audit --no-fund
+          python3 - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          before=json.loads(Path('lock-review/before.json').read_text())['packages']
+          after=json.loads(Path('package-lock.json').read_text())['packages']
+          changed=set(subprocess.check_output(['git','diff','--name-only'],text=True).splitlines())
+          if changed != {'package-lock.json'}:raise SystemExit('Unexpected file scope')
+          deltas=[]
+          for key in sorted(set(before)|set(after)):
+              if before.get(key)==after.get(key):continue
+              name=key.split('node_modules/')[-1]
+              if not (name.startswith('@babel/') or name in {'brace-expansion','balanced-match','concat-map'}):
+                  raise SystemExit(f'Unexpected package family: {key}')
+              value=after.get(key,{})
+              if value.get('resolved') and not value['resolved'].startswith('https://registry.npmjs.org/'):
+                  raise SystemExit(f'Unexpected registry: {key}')
+              if value.get('link'):raise SystemExit('Unexpected link package')
+              deltas.append({'path':key,'before':before.get(key,{}).get('version'),'after':value.get('version')})
+          Path('lock-review/deltas.json').write_text(json.dumps(deltas,indent=2)+'\n')
+          print(json.dumps(deltas,indent=2))
+          PY
+      - name: Reproducible install and acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run lint
+          npm run typecheck
+          npm run test:dependencies
+          npm run build
+          npm audit --audit-level=low --json | tee lock-review/audit-all.json
+          git diff --binary -- package-lock.json > lock-review/lock.patch
+          sha256sum lock-review/lock.patch > lock-review/lock.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reviewed-development-lock
+          path: lock-review/
+          retention-days: 7
+          if-no-files-found: error
+  publish-review-branch:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: maintenance/review-integration-20260915
+      - uses: actions/download-artifact@v4
+        with:
+          name: reviewed-development-lock
+          path: lock-review
+      - name: Commit only the validated lockfile on the review branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = 'WiktorNykiel/fundamentos-ciberseguridad'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          sha256sum --check lock-review/lock.sha256
+          git apply --check lock-review/lock.patch
+          git apply lock-review/lock.patch
+          test "$(git diff --name-only)" = 'package-lock.json'
+          git add package-lock.json
+          git config user.name 'Wiktor Nykiel'
+          git config user.email 'WiktorNykiel@users.noreply.github.com'
+          git commit -m 'fix: patch Babel and brace-expansion development dependencies'
+          git push origin HEAD:refs/heads/maintenance/review-integration-20260915
