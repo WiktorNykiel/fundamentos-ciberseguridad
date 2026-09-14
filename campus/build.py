@@ -226,7 +226,7 @@ def collect(course: Path = COURSE) -> dict:
                           'kind':'Lección ampliada' if path.parent.name == 'lecciones' else 'Referencia',
                           'source':REPO+'/blob/main/'+quote(source,safe='/'), **markdown(raw, source, 'D'+str(index+1))})
     blocks = [{'id':b[0], 'title':b[1], 'description':b[4], 'hours':sum(m['hours'] for m in modules if m['block']==b[0])} for b in BLOCKS]
-    result = {'id':'fundamentos-ciberseguridad', 'version':'2.0.0', 'repository':REPO, 'modules':modules,
+    result = {'id':'fundamentos-ciberseguridad', 'version':'2.0.1', 'repository':REPO, 'modules':modules,
               'blocks':blocks, 'resources':resources, 'hours':sum(m['hours'] for m in modules)}
     if result['hours'] != 480 or sum(m['theoryHours'] for m in modules)!=168: raise ValueError('Carga incoherente.')
     route_content(result)

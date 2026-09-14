@@ -1,6 +1,6 @@
 # Campus web · Fundamentos de ciberseguridad
 
-**Wiktor Nykiel · Versión 2.0.0 · Español · Interfaz clara.**
+**Wiktor Nykiel · Versión 2.0.1 · Español · Interfaz clara.**
 
 Campus estático construido desde el temario del repositorio. Conserva 32 módulos, 480 horas planificadas y 96 fichas de laboratorio. Añade 32 apuntes explicativos y 32 autoevaluaciones públicas. Integra las ocho guías R01–R08 disponibles y una biblioteca de referencias y lecciones. No sustituye el temario por diapositivas.
 
@@ -77,3 +77,9 @@ python3 campus/tests/browser.py
 ```
 
 El workflow compila el curso real, ejecuta las pruebas y adjunta sitio, logs y capturas. Tiene permiso de lectura del repositorio y no despliega ni necesita secretos. La conclusión de cada ejecución se consulta en Actions: no se declara una validación por el mero hecho de existir un test. Las pruebas web no acreditan haber ejecutado las 96 prácticas nativas ni impartido la formación.
+
+## Mantenimiento 2.0.1
+
+Se evita reescribir localStorage al recibir un evento de otra pestaña. Una práctica con cinco fases confirmadas se reabre en el cierre. Las copias JSON admiten hasta 1 MiB medido en UTF-8 para permitir recuperar las notas Unicode de todos los módulos. Se conserva el esquema de progreso v1 y su clave.
+
+Las dependencias Next.js de la raíz se validan separadamente; no se incorporan al campus estático. Véase el registro de mantenimiento de septiembre de 2026 en docs/maintenance/.
