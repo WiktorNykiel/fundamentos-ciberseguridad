@@ -47,9 +47,10 @@ test('baseline mapping exposes version data', () => {
   assert.equal(typeof mapping.getAllVersions, 'function');
   assert.ok(mapping.getAllVersions());
 });
-test('humanfs module can be loaded with runtime dependencies', async () => {
+test('humanfs reads bounded JSON with runtime dependencies', async () => {
   const {hfs} = await import('@humanfs/node');
-  assert.equal(typeof hfs.read, 'function');
+  const config = await hfs.json('package.json');
+  assert.equal(config.dependencies.next, '16.3.5');
 });
 test('sharp processes an in-memory 8x8 image', async () => {
   const sharp=require('sharp');
