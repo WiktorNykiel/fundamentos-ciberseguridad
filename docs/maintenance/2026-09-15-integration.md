@@ -21,12 +21,22 @@ El job posterior que intentó publicar la rama no pudo actualizar un workflow po
 
 El artefacto descargado `reviewed-integration-candidate` tiene SHA-256 `6d49c8fbe83b41e0215d5b0e46f215d4c8561928d958a830bc4b6ac49dfbd22a`. Contiene las diferencias, logs, comentarios/revisiones consultados y sitio compilado. Los PR no contenían solicitudes de cambios ni comentarios inline en la consulta.
 
+## Hallazgos adicionales al auditar desarrollo
+
+El primer control de todo el árbol, no solo producción, detectó `@babel/core` 7.29.0 y dos instancias de `brace-expansion` (1.1.13 y 5.0.5) afectadas por avisos. No se desactivó ese control para poder fusionar.
+
+Se actualizó de manera acotada el lockfile de las familias Babel y brace-expansion, respetando los rangos existentes y sin `--force` ni scripts de instalación. Resultado: @babel/core 7.29.7, brace-expansion 1.1.21 y la instancia anidada 5.0.12, junto con dependencias coherentes de Babel. Se verificó que el diff solo cambiaba package-lock.json, las familias aprobadas y orígenes registry.npmjs.org.
+
+El run [34907458106](https://github.com/WiktorNykiel/fundamentos-ciberseguridad/actions/runs/34907458106) volvió a instalar, ejecutar lint/tipos, 12 comprobaciones de compatibilidad, build Next y auditoría completa con umbral bajo. El informe descargado contiene cero vulnerabilidades reportadas de cualquier severidad. Artefacto `reviewed-development-lock`, SHA-256 `a8cc75863d5c422e476e257c3f9b476833f7395df8b44c04ee360ed6579947da`.
+
+Referencias primarias: [aviso de Babel](https://github.com/babel/babel/security/advisories/GHSA-4x5r-pxfx-6jf8) y [aviso de brace-expansion](https://github.com/juliangruber/brace-expansion/security/advisories/GHSA-rgw5-rvv9-x895). No se incluyen ni ejecutan reproducciones de explotación.
+
 ## Aceptación final y mantenimiento
 
-Los workflows temporales de preparación y el script de composición se eliminan de la revisión final. Permanecen dos controles de lectura: campus y aplicación heredada. El del campus también se ejecuta ante cambios del manifiesto o lockfile raíz. El de la aplicación comprueba instalación sin scripts de ciclo de vida, lint, tipos, pruebas de compatibilidad, build y auditorías de producción y conjunto completo, con umbral de rechazo alto/crítico.
+Todos los workflows temporales y el script de preparación se eliminan de la revisión final. Permanecen dos controles de lectura: campus y aplicación heredada. El del campus también se ejecuta ante cambios del manifiesto o lockfile raíz. El de la aplicación comprueba instalación sin scripts de ciclo de vida, lint, tipos, pruebas de compatibilidad, build y auditorías de producción y conjunto completo, con umbral de rechazo alto/crítico.
 
 Las pruebas comprueban versiones mínimas y coherencia entre paquetes relacionados, sin bloquear automáticamente cada parche futuro por una versión exacta incrustada en el test. Las versiones efectivas siguen fijadas en package.json y package-lock.json.
 
-La revisión final se vuelve a validar en su PR antes de fusionar. Su SHA y conclusión deben consultarse en Actions; no se atribuyen al nuevo commit resultados de uno anterior. Cero avisos en una auditoría no equivale a ausencia garantizada de vulnerabilidades.
+La revisión final se vuelve a validar en el PR #17 antes de fusionar. Su SHA y conclusión deben consultarse en Actions; no se atribuyen al nuevo commit resultados de uno anterior. Cero avisos en una auditoría no equivale a ausencia garantizada de vulnerabilidades.
 
 Se elimina la descarga de fuentes de Google durante el build de la aplicación de referencia y se utilizan tipografías de sistema con presentación clara. No se modifican permisos, reglas de ramas, requisitos de revisión ni despliegues de Cloudflare. El contenido docente y la aplicación previa se conservan. Las pruebas web no acreditan ejecutar los 96 laboratorios nativos ni las prácticas Windows/macOS.
