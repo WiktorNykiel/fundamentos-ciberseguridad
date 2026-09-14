@@ -130,4 +130,37 @@ class BrowserTests(unittest.TestCase):
         self.page.get_by_role('button',name='Contrastar cantidades').click()
         self.assertIn('Coincide con R01',self.page.locator('#result-feedback').inner_text())
         self.assertFalse(self.state()['labs']['L05A']['done'])
+    def test_21_tabs_do_not_echo_storage_updates(self):
+        self.goto('#/modulo/M05')
+        other=self.context.new_page()
+        other.goto(self.base+'/#/modulo/M06')
+        other.locator('#read-check').wait_for()
+        self.page.evaluate("window.storageEvents=0; window.addEventListener('storage',()=>window.storageEvents++)")
+        other.evaluate("window.storageEvents=0; window.addEventListener('storage',()=>window.storageEvents++)")
+        self.page.locator('#read-check').check()
+        self.page.wait_for_timeout(500)
+        events=self.page.evaluate('window.storageEvents')+other.evaluate('window.storageEvents')
+        self.assertLessEqual(events,4,'A storage event must not be written back to other tabs')
+        self.assertTrue(other.evaluate('(key)=>JSON.parse(localStorage.getItem(key)).modules.M05.read',KEY))
+        self.assertEqual(self.state()['lastRoute'],'#/modulo/M05')
+        other.close()
+    def test_22_completed_wizard_reopens_at_closure(self):
+        self.goto('#/modulo/M05/practica/L05A')
+        for _ in range(5):
+            self.page.locator('[data-action=step-done]').click()
+        self.page.reload()
+        self.page.locator('[data-action=step-done]').wait_for()
+        self.assertEqual(self.page.locator('[data-action=step][aria-current=step]').get_attribute('data-step'),'4')
+    def test_23_unicode_export_can_be_imported(self):
+        self.goto('#/modulo/M01')
+        state=self.state()
+        for module in state['modules'].values():module['notes']='界'*3000
+        payload=json.dumps(state,ensure_ascii=False).encode('utf-8')
+        self.assertGreater(len(payload),200000)
+        self.goto('#/progreso')
+        self.page.once('dialog',lambda d:d.accept())
+        self.page.locator('#import-file').set_input_files({'name':'unicode-progress.json','mimeType':'application/json','buffer':payload})
+        self.page.wait_for_timeout(150)
+        self.assertEqual(self.state()['modules']['M32']['notes'],'界'*3000)
 if __name__=='__main__':unittest.main(verbosity=2)
+

@@ -1,6 +1,6 @@
 /** Estado local versionado. El avance es autodeclarado, no acreditación. */
 export const KEY = 'fundamentos-ciberseguridad:progress:v1';
-export const MAX_IMPORT = 200000;
+export const MAX_IMPORT = 1024 * 1024;
 const plain = v => v !== null && typeof v === 'object' && !Array.isArray(v) && [Object.prototype, null].includes(Object.getPrototypeOf(v));
 const allowed = (o, keys) => plain(o) && Object.keys(o).every(k => keys.includes(k));
 export function emptyState(course) {
@@ -34,7 +34,7 @@ export function validateState(value, course) {
   return output;
 }
 export function parseImport(text, course) {
-  if (typeof text !== 'string' || text.length > MAX_IMPORT) throw new Error('Archivo demasiado grande (máximo 200 KB).');
+  if (typeof text !== 'string' || new TextEncoder().encode(text).byteLength > MAX_IMPORT) throw new Error('Archivo demasiado grande (máximo 1 MiB en UTF-8).');
   return validateState(JSON.parse(text), course);
 }
 export function progress(course, state) {
@@ -49,3 +49,9 @@ export function progress(course, state) {
 }
 export function moduleDone(m,state) {return state.modules[m.id].read && state.modules[m.id].quiz && m.labs.every(l=>state.labs[l.id].done);}
 export function escapeHTML(value) {return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+/** Reanudar en la primera fase pendiente, o en cierre si ya se confirmaron todas. */
+export function nextLabStep(lab) {
+  const pending = lab.steps.findIndex(value => !value);
+  return pending < 0 ? lab.steps.length - 1 : pending;
+}
