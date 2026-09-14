@@ -26,7 +26,19 @@ jobs:
         with:
           python-version: '3.13'
       - name: Prepare reviewed sources and pinned PR changes
-        run: python3 maintenance/prepare_integration.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 maintenance/prepare_integration.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('campus/assets/app.js')
+          text=p.read_text()
+          old='function persist(){state.updatedAt='
+          new="function persist(){if(activeModule)state.lastRoute=link(activeModule.id,activeLab?'/practica/'+activeLab.id:'');state.updatedAt="
+          assert old in text
+          p.write_text(text.replace(old,new))
+          PY
       - name: Record review discussions and stop on requested changes
         env:
           GH_TOKEN: ${{ github.token }}
