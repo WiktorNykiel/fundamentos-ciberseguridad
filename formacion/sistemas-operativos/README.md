@@ -1,55 +1,65 @@
 # Sistemas operativos, administración y ciberseguridad
 
-**Wiktor Nykiel · Edición 1.1 · Español · Distribución privada · 14 de septiembre de 2026.**
+**Wiktor Nykiel · Edición documental 1.2 · Español · 14 de septiembre de 2026.**
 
-Programa independiente para aprender a comprender, operar, proteger, automatizar e investigar sistemas Linux, Windows y macOS. Se comienza con archivos, terminal y funcionamiento del SO; se termina integrando administración, evidencias, recuperación y comunicación. Predomina la terminal, con GUI para comprender y contrastar resultados.
+Programa independiente para comprender, operar, proteger, automatizar e investigar sistemas Linux, Windows y macOS. Se comienza con archivos, terminal y funcionamiento del SO; se termina integrando administración, evidencias, recuperación y comunicación. Predomina la terminal, con GUI para comprender y contrastar resultados.
+
+**Difusión pública solicitada por el titular.** El cambio de visibilidad del repositorio requiere una operación administrativa distinta de guardar o fusionar archivos. El estado y los materiales preparados están en [Publicación y distribución](PUBLICACION.md); no se debe interpretar esta cabecera como prueba de acceso anónimo.
 
 ## Empezar por una actividad real
 
-Abrir [Inicio rápido](INICIO-RAPIDO.md), preparar una carpeta sintética y completar [R01: archivos](practicas/R01-archivos.md). Después seguir [el plan docente](PLAN-DOCENTE.md) y [el laboratorio](LABORATORIO.md). El kit es material de apoyo: un alumno inicial no necesita saber Python para utilizar un dataset preparado por el docente.
+Abrir [Inicio rápido](INICIO-RAPIDO.md), preparar una carpeta sintética y completar [R01: archivos](practicas/R01-archivos.md). Después seguir [el plan docente](PLAN-DOCENTE.md) y [el laboratorio](LABORATORIO.md). Un alumno inicial no necesita programar en Python para trabajar con datos preparados por el docente.
 
-| Recurso | Qué contiene |
+| Recurso | Contenido |
 |---|---|
-| [Lecciones desarrolladas](lecciones/README.md) | Ocho capítulos con explicación, ejemplos, errores y preguntas de defensa |
-| [Prácticas paso a paso](practicas/README.md) | Ocho runbooks vinculados a laboratorios del programa, con resultados, variantes y recuperación |
-| [Kit ejecutable](kit/README.md) | Datos sintéticos, herramientas offline, ejemplos Bash/BAT/PowerShell/zsh y servicio web de laboratorio |
-| [Planificación verificable](planificacion/README.md) | Catálogo de 32 módulos y generación de 240 sesiones y 96 laboratorios |
-| [Resultados de validación](qa/RESULTADOS.md) | Pruebas ejecutadas, versiones, alcance y limitaciones |
-| [Cambios de esta edición](CHANGELOG.md) | Diferencias entre diseño curricular y material ejecutable añadido |
+| [Lecciones desarrolladas](lecciones/README.md) | Ocho capítulos con explicaciones, ejemplos y preguntas de defensa. |
+| [Prácticas paso a paso](practicas/README.md) | Ocho runbooks del kit del repositorio, vinculados al programa. |
+| [Kit del repositorio](kit/README.md) | Datos sintéticos, herramientas offline, Bash/BAT/PowerShell/zsh y servicio web de laboratorio. |
+| [Planificación verificable](planificacion/README.md) | Catálogo de 32 módulos y generación de 240 sesiones y 96 laboratorios. |
+| [Ampliación práctica 1.1 para alumnos](PUBLICACION.md) | Paquete separado con 16 guías ampliadas, scripts, 64 preguntas sin soluciones y planificación XLSX/JSON/CSV. |
+| [Resultados del kit del repositorio](qa/RESULTADOS.md) | Registro histórico de sus pruebas, versiones y límites. |
+| [Cambios anteriores](CHANGELOG.md) | Desarrollo del material ejecutable y del diseño curricular. |
 
-## Programa completo: 480 horas
+## Fundamentos y administración de sistemas: 322 horas
 
-| Bloque | Módulos | Horas | Desarrollo curricular |
-|---|---|---:|---|
-| Fundamentos, laboratorio y método | M01–M04 | 56 | [Fundamentos](modulos/01-fundamentos.md) |
-| Linux y Bash | M05–M12 | 112 | [Linux](modulos/02-linux.md) |
-| Windows, CMD, BAT y PowerShell | M13–M19 | 98 | [Windows](modulos/03-windows.md) |
-| macOS, Darwin y zsh | M20–M23 | 56 | [macOS](modulos/04-macos.md) |
-| Operación multiplataforma y ciberseguridad | M24–M30 | 98 | [Operación y seguridad](modulos/05-operacion-seguridad.md) |
-| IA desde terminal | M31 | 20 | [IA](modulos/06-ia.md) |
-| Proyecto integrador y defensa | M32 | 40 | [Capstone](CAPSTONE.md) |
-| **Total** | **32** | **480** | **168 de teoría y 312 de práctica** |
+| Bloque | Horas | Contenido principal |
+|---|---:|---|
+| **[Fundamentos y método](modulos/01-fundamentos.md)** | **56** | Bits y bytes, codificaciones, hardware, arquitectura del SO, procesos, memoria, almacenamiento, laboratorio, terminal, documentación y Git. |
+| **[Linux y Bash](modulos/02-linux.md)** | **112** | Directorios y archivos, búsquedas y pipelines, usuarios, permisos y ACL, procesos, paquetes, servicios, tareas, almacenamiento, copias, redes y scripting robusto. |
+| **[Windows, CMD, BAT y PowerShell](modulos/03-windows.md)** | **98** | Administración GUI y CLI, arquitectura y Registro, utilidades nativas, lotes, objetos y datos, servicios, permisos NTFS, identidad, acceso remoto, eventos y recuperación. |
+| **[macOS, Darwin y zsh](modulos/04-macos.md)** | **56** | APFS, rutas y metadatos, Finder y Terminal, diferencias Bash/zsh, preferencias, usuarios, launchd, servicios, redes, seguridad de plataforma y evidencias. |
+| **Subtotal de los cuatro bloques** | **322** | **M01–M23.** |
 
-Se mantienen los 96 laboratorios diseñados, tres por módulo. Los ocho runbooks nuevos concretan una selección de ellos; no son horas ni laboratorios adicionales. Las rutas abreviadas de 60, 120 y 240 horas siguen definidas en el plan docente, con alcance diferenciado.
+## Integración y especialización: 158 horas
 
-## Aprender, comprobar, explicar
+| Bloque | Horas | Contenido principal |
+|---|---:|---|
+| [Operación multiplataforma y ciberseguridad](modulos/05-operacion-seguridad.md) | 98 | M24–M30: redes, acceso remoto, transferencias, web/TLS, contenedores, observabilidad, DFIR, IOCs/CTI y evaluación de controles. |
+| [IA desde terminal](modulos/06-ia.md) | 20 | M31: revisión de scripts y logs, propuestas estructuradas, privacidad y validación humana. |
+| [Proyecto integrador](CAPSTONE.md) | 40 | M32: construir, operar, bastionar, investigar, recuperar y defender una solución. |
+| **Subtotal** | **158** | No sustituye los cuatro bloques de sistemas. |
+| **Programa completo** | **480** | **32 módulos · 168 horas de teoría · 312 horas de práctica.** |
 
-Cada práctica pide identificar sistema, versión, identidad, directorio y efecto esperado; utilizar privilegios mínimos; conservar datos originales; verificar un resultado positivo y uno negativo; y documentar reversión. Se propone resolver o verificar por CLI al menos el 80 % de las tareas prácticas evaluables, con adaptaciones de accesibilidad.
+Se mantienen 96 laboratorios diseñados, tres por módulo, y 240 sesiones de dos horas. Los runbooks y las guías ampliadas concretan laboratorios existentes: no añaden horas automáticamente. Las rutas de 60, 120 y 240 horas tienen alcance diferenciado en el plan docente.
 
-Los ejemplos de Bash, BAT, PowerShell y zsh operan sobre el mismo dataset para comparar modelos y límites, no para fingir que los sistemas son iguales. Windows nativo es necesario para Registro, NTFS, Event Log y administración de Windows. macOS nativo es necesario para APFS, launchd, TCC y controles Apple. PowerShell en Linux no sustituye esas comprobaciones.
+## Aprender, comprobar y explicar
 
-La perspectiva Red/Purple se trabaja mediante revisión de permisos y superficie, relaciones de confianza, segmentación, pruebas benignas y retest. La investigación utiliza evidencia sintética; no contiene instrucciones de intrusión, evasión ni extracción de credenciales. La IA propone y explica: no ejecuta automáticamente, no recibe secretos y no valida por sí sola sus conclusiones.
+Cada práctica pide identificar sistema, versión, identidad, directorio y efecto; utilizar privilegios mínimos; conservar originales; verificar resultados positivos y negativos; y documentar recuperación. Se propone resolver o verificar por CLI al menos el 80 % de las tareas prácticas evaluables, con adaptaciones de accesibilidad.
 
-## Estado real de esta entrega
+Linux, Windows y macOS se trabajan como plataformas reales. PowerShell en Linux no valida Registro, NTFS, Event Log o administración nativa de Windows. Un contenedor Linux no valida APFS, launchd, TCC o controles de Apple. Los ejemplos de los distintos lenguajes permiten comparar contratos y diferencias, no fingir equivalencia entre sistemas.
 
-**50 pruebas automatizadas ejecutadas en Linux: 42 del kit/HTTP local y 8 de planificación**, además de comprobación sintáctica Bash. Los scripts nativos Windows/PowerShell y zsh/macOS están escritos y documentados, pero no ejecutados en sus plataformas. Los manifiestos Docker/Compose/Swarm están preparados, no desplegados ni certificados.
+La perspectiva Red/Purple utiliza revisión de permisos y superficie, confianza, segmentación, pruebas benignas y retest. La investigación usa evidencia sintética. La IA propone y explica; no recibe secretos, ejecuta automáticamente ni valida por sí sola sus conclusiones.
 
-No se afirma haber ejecutado los 96 laboratorios completos, ni impartido 480 horas, ni validado una cohorte. El servicio HTTP es exclusivamente didáctico, sin autenticación/TLS y no apto para producción. Consultar [validación](VALIDACION.md) y [resultados](qa/RESULTADOS.md) antes de reutilizarlo.
+## Validación: dos conjuntos de material distintos
 
-## Material docente y de consulta
+El kit integrado en `kit/` conserva su informe histórico de **50 pruebas** en [qa/RESULTADOS.md](qa/RESULTADOS.md). La ampliación descargable utiliza otro motor, otros scripts y sus propios fixtures: **75 pruebas locales correctas** al volver a verificar el paquete para alumnos el 14 de septiembre de 2026. No se suman ambas cifras como si representasen cobertura única ni se mezclan sus datasets o comandos.
 
-[Guía del docente](GUIA-DOCENTE.md) · [Competencias y perfiles](COMPETENCIAS.md) · [Evaluación](EVALUACION.md) · [Banco de preguntas](BANCO-PREGUNTAS.md) · [Equivalencias por sistema](REFERENCIA-CRUZADA.md) · [Guías rápidas](CHEATSHEETS.md) · [Bastionado](BASTIONADO.md) · [Plantillas](PLANTILLAS.md) · [Fuentes](FUENTES.md) · [Uso responsable](USO-RESPONSABLE.md).
+Los scripts nativos Windows/PowerShell/BAT y macOS/zsh necesitan ejecución en sus plataformas. Docker/Compose/Swarm están preparados, no desplegados. No se afirma haber ejecutado los 96 laboratorios completos, impartido 480 horas o validado una cohorte. El servidor HTTP es didáctico, no una plataforma de producción.
 
-Los materiales están autocontenidos en este directorio y no necesitan ejecutar ni modificar la aplicación de la raíz del repositorio. No se activa publicación web, GitHub Pages, nuevos colaboradores o despliegues automáticos. Antes de compartir con alumnos, separar soluciones y expedientes mediante permisos reales: una carpeta no constituye una frontera de acceso.
+## Material de consulta
 
-Materiales propios reservados para el titular. Las referencias externas conservan sus licencias; no se redistribuyen instaladores, imágenes o manuales de terceros.
+[Guía docente](GUIA-DOCENTE.md) · [Competencias](COMPETENCIAS.md) · [Evaluación](EVALUACION.md) · [Preguntas introductorias](BANCO-PREGUNTAS.md) · [Equivalencias por sistema](REFERENCIA-CRUZADA.md) · [Guías rápidas](CHEATSHEETS.md) · [Bastionado](BASTIONADO.md) · [Plantillas](PLANTILLAS.md) · [Fuentes](FUENTES.md) · [Uso responsable](USO-RESPONSABLE.md).
+
+El curso no necesita ejecutar la aplicación de la raíz. Los expedientes, las respuestas de evaluación y las comunicaciones privadas no deben publicarse. La copia para alumnos se distribuye sin el directorio de soluciones docentes ni el libro original con respuestas. Una carpeta o una rama dentro de un repositorio público no constituye control de acceso.
+
+No se asigna automáticamente una nueva licencia libre. Los materiales propios y las referencias externas conservan sus derechos y licencias; no se redistribuyen instaladores, imágenes ni manuales completos de terceros.
