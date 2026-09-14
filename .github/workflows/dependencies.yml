@@ -1,0 +1,46 @@
+name: Legacy app - dependency acceptance
+on:
+  push:
+    branches: [main]
+    paths: ['package.json', 'package-lock.json', 'src/**', 'tests/dependencies.test.cjs', '*.config.*', 'tsconfig.json', '.github/workflows/dependencies.yml']
+  pull_request:
+    paths: ['package.json', 'package-lock.json', 'src/**', 'tests/dependencies.test.cjs', '*.config.*', 'tsconfig.json', '.github/workflows/dependencies.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: dependencies-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Reproducible install without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:dependencies
+      - run: npm run build
+      - name: Audit production dependencies
+        shell: bash
+        run: |
+          set -o pipefail
+          npm audit --omit=dev --audit-level=high --json | tee dependency-audit.json
+      - name: Retain audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-dependency-audit
+          path: dependency-audit.json
+          retention-days: 7
+          if-no-files-found: warn
