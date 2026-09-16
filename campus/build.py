@@ -4,7 +4,6 @@ from __future__ import annotations
 import hashlib
 import html
 import json
-import os
 import re
 import shutil
 import tempfile
@@ -12,6 +11,7 @@ import zipfile
 from pathlib import Path
 from urllib.parse import quote, urlsplit
 from content import notes_and_quizzes
+from provenance import source_commit
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -261,6 +261,7 @@ def route_content(data: dict) -> None:
 
 
 def build() -> dict:
+    commit = source_commit(ROOT)
     data = collect(); out = HERE/'dist'
     if out.is_symlink(): raise ValueError('dist no puede ser un enlace.')
     if out.exists() and not (out/'.campus-generated').is_file(): raise ValueError('dist no pertenece al generador.')
@@ -303,16 +304,7 @@ def build() -> dict:
             'resources':len(data['resources']),'slides':sum(len(m['slides']) for m in data['modules']),
             'guidedLabs':sum('guide' in lab for m in data['modules'] for lab in m['labs']), 'hours':data['hours']}
     report['version']=data['version']
-    commit=os.environ.get('CF_PAGES_COMMIT_SHA') or os.environ.get('GITHUB_SHA','')
-    if not commit:
-        # Git is optional locally; never invent a commit when no checkout exists.
-        import subprocess
-        try:
-            subprocess.run(['git','diff','--quiet','HEAD'],cwd=ROOT,check=True,capture_output=True,timeout=5)
-            commit=subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,check=True,capture_output=True,text=True,timeout=5).stdout.strip()
-        except (OSError,subprocess.SubprocessError):
-            commit=''
-    report['sourceCommit']=commit if re.fullmatch(r'[0-9a-f]{40}',commit) else None
+    report['sourceCommit']=commit
     report['courseSha256']=hashlib.sha256((out/'course.json').read_bytes()).hexdigest()
     (out/'build-info.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     manifest = ''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.relative_to(out).as_posix()+'\n' for p in sorted(out.rglob('*')) if p.is_file() and not p.name.startswith('.'))
