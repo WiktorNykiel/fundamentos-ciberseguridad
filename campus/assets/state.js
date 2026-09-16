@@ -26,7 +26,7 @@ export function validateState(value, course) {
     if (!allowed(value.preferences,['platform','largeText']) || !['linux','windows','macos'].includes(value.preferences.platform) || typeof value.preferences.largeText !== 'boolean') throw new Error('Preferencias inválidas.');
     output.preferences = {...value.preferences};
   }
-  if (typeof value.lastRoute === 'string' && /^#\/modulo\/M\d{2}(?:\/practica\/L\d{2}[ABC])?$/.test(value.lastRoute)) {
+  if (typeof value.lastRoute === 'string' && /^#\/modulo\/M\d{2}(?:\/(?:practicas|revision|practica\/L\d{2}[ABC]))?$/.test(value.lastRoute)) {
     const parts=value.lastRoute.split('/'); const module=course.modules.find(m=>m.id===parts[2]);
     if (module && (!parts[4] || module.labs.some(l=>l.id===parts[4]))) output.lastRoute=value.lastRoute;
   }

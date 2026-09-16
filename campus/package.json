@@ -1,12 +1,12 @@
 {
   "name": "fundamentos-ciberseguridad-campus",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "private": true,
   "type": "module",
-  "description": "Campus estático, sin dependencias de producción",
+  "description": "Campus est\u00e1tico, sin dependencias de producci\u00f3n",
   "scripts": {
     "build": "python3 build.py",
-    "test": "node --test tests/state.test.mjs",
+    "test": "node --test tests/*.test.mjs",
     "preview": "python3 serve.py"
   },
   "engines": {

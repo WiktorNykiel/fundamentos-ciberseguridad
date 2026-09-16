@@ -121,7 +121,7 @@ class BrowserTests(unittest.TestCase):
     def test_19_continuous_reading(self):
         self.page.goto(self.base+'/lectura.html')
         self.assertEqual(self.page.locator('article[id^=M]').count(),32)
-        self.assertEqual(self.page.locator('article[id^=D]').count(),18)
+        self.assertEqual(self.page.locator('article[id^=D]').count(),len(self.data['resources']))
         self.assertEqual(self.page.locator('script').count(),0)
     def test_20_manual_result_check(self):
         self.goto('#/modulo/M05/practica/L05A')
@@ -162,5 +162,38 @@ class BrowserTests(unittest.TestCase):
         self.page.locator('#import-file').set_input_files({'name':'unicode-progress.json','mimeType':'application/json','buffer':payload})
         self.page.wait_for_timeout(150)
         self.assertEqual(self.state()['modules']['M32']['notes'],'界'*3000)
+    def test_24_outline(self):
+        self.goto('#/temario')
+        self.assertEqual(self.page.locator('.outline-table tbody tr').count(),32)
+        self.page.locator('tr[data-module=M16] a').first.click()
+        self.assertIn('#/modulo/M16',self.page.url)
+    def test_25_onboarding(self):
+        self.goto('#/empezar')
+        self.assertTrue(self.page.get_by_role('heading',name='Empieza por aquí.').is_visible())
+        self.page.get_by_role('link',name='Guía de estudio completa').click()
+        self.page.locator('#main article.prose').wait_for()
+    def test_26_multiterm_search(self):
+        self.page.locator('#global-search').fill('Linux permisos')
+        self.page.get_by_role('heading',name='Resultados de búsqueda.').wait_for()
+        self.assertGreater(self.page.locator('.search-result').count(),0)
+    def test_27_resume_review_tab(self):
+        self.goto('#/modulo/M05/revision')
+        self.assertEqual(self.state()['lastRoute'],'#/modulo/M05/revision')
+        self.page.reload();self.page.locator('#main h1').wait_for()
+        self.assertEqual(self.state()['lastRoute'],'#/modulo/M05/revision')
+    def test_28_cross_tab_continuation_is_local(self):
+        self.goto('#/modulo/M05')
+        other=self.context.new_page();other.goto(self.base+'/#/modulo/M06')
+        other.locator('#read-check').wait_for()
+        other.locator('#read-check').check();self.page.wait_for_timeout(200)
+        self.goto('#/curso')
+        self.assertIn('/M05',self.page.get_by_role('link',name=re.compile('Continuar mi recorrido')).get_attribute('href'))
+        other.close()
+    def test_29_mobile_outline(self):
+        self.page.set_viewport_size({'width':390,'height':844});self.goto('#/temario')
+        self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),391)
+        self.page.screenshot(path=str(HERE/'qa/screenshots/06-indice-movil.png'),full_page=True)
+    def test_30_intro_does_not_change_resume(self):
+        self.goto('#/modulo/M05/practicas');self.goto('#/empezar')
+        self.assertEqual(self.state()['lastRoute'],'#/modulo/M05/practicas')
 if __name__=='__main__':unittest.main(verbosity=2)
-
