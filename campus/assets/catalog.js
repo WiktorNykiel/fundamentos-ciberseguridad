@@ -30,6 +30,20 @@ if (typeof document !== 'undefined') {
   document.addEventListener('input', refresh);
   document.addEventListener('change', refresh);
   document.addEventListener('click', event => {
+    const jump = event.target.closest('[data-scroll^="outline-"]');
+    if (jump && document.querySelector('#outline-query')) {
+      const section = document.getElementById(jump.dataset.scroll);
+      const block = jump.dataset.scroll.slice('outline-'.length);
+      if (section && [...document.querySelector('#outline-block').options].some(option => option.value === block)) {
+        event.preventDefault();
+        document.querySelector('#outline-query').value = '';
+        document.querySelector('#outline-block').value = block;
+        document.querySelector('#outline-status').value = 'all';
+        applyFilters(document);
+        section.scrollIntoView({block: 'start'});
+      }
+      return;
+    }
     if (!event.target.closest('#outline-reset')) return;
     document.querySelector('#outline-query').value = '';
     document.querySelector('#outline-block').value = 'all';

@@ -2,7 +2,7 @@
 
 ## Edición 2.2: alcance de las nuevas comprobaciones
 
-Se añaden 13 contratos offline del wrapper de despliegue y conservación de rutas D01–D20, y ocho pruebas de filtros del índice. Las 31 pruebas de navegador existentes se amplían con cinco casos: filtrado por bloque, texto y progreso, estado vacío/reinicio, nueva lección D21 y filtros en móvil.
+Se añaden 13 contratos offline del wrapper de despliegue y conservación de rutas D01–D20, y ocho pruebas de filtros del índice. Las 31 pruebas de navegador existentes se amplían con seis casos: filtrado por bloque, texto y progreso, estado vacío/reinicio, nueva lección D21, filtros en móvil y salto a un bloque oculto por filtros previos.
 
 El workflow `Cloudflare - static deployment acceptance` usa Wrangler 4.132.0 con `--dry-run` y runtime `--local`, sin credenciales Cloudflare ni cambios remotos. Comprueba contenido, MIME, CSP y HTTP 404. Los resultados se consultan en la ejecución concreta; ningún workflow de esta edición publica en una cuenta. Las pruebas unitarias no demuestran que el runtime o navegador se haya ejecutado.
 

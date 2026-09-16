@@ -31,6 +31,14 @@ class ExtendedBrowserTests(base.BrowserTests):
         self.assertEqual(self.page.locator('[data-outline-row]:visible').count(),4)
         self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),391)
         self.page.screenshot(path=str(base.HERE/'qa/screenshots/06-indice-filtros-movil.png'),full_page=True)
+    def test_37_block_jump_clears_conflicting_filters(self):
+        self.goto('#/temario')
+        self.page.locator('#outline-block').select_option('macos')
+        self.page.locator('#outline-query').fill('sincoincidencias123')
+        self.page.locator('[data-scroll="outline-linux"]').click()
+        self.assertEqual(self.page.locator('#outline-block').input_value(),'linux')
+        self.assertEqual(self.page.locator('[data-outline-row]:visible').count(),8)
+        self.assertEqual(self.page.locator('#outline-query').input_value(),'')
 
 
 if __name__=="__main__":unittest.main(verbosity=2)
