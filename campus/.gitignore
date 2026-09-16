@@ -1,5 +1,5 @@
 dist/
-qa/screenshots/
+qa/
 pages-ready.zip
 __pycache__/
 *.pyc
