@@ -196,4 +196,15 @@ class BrowserTests(unittest.TestCase):
     def test_30_intro_does_not_change_resume(self):
         self.goto('#/modulo/M05/practicas');self.goto('#/empezar')
         self.assertEqual(self.state()['lastRoute'],'#/modulo/M05/practicas')
+    def test_31_cross_tab_resume_survives_dashboard_reload(self):
+        self.goto('#/modulo/M05')
+        self.page.locator('#read-check').check()
+        self.goto('#/curso')
+        other=self.context.new_page();other.goto(self.base+'/#/modulo/M06')
+        other.locator('#read-check').check()
+        self.page.wait_for_timeout(200)
+        self.page.reload()
+        self.page.get_by_role('heading',name=re.compile('Entiende el sistema')).wait_for()
+        self.assertIn('/M05',self.page.get_by_role('link',name=re.compile('Continuar mi recorrido')).get_attribute('href'))
+        other.close()
 if __name__=='__main__':unittest.main(verbosity=2)

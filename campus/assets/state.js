@@ -1,5 +1,6 @@
 /** Estado local versionado. El avance es autodeclarado, no acreditación. */
 export const KEY = 'fundamentos-ciberseguridad:progress:v1';
+export const TAB_ROUTE_KEY = KEY + ':tab-route';
 export const MAX_IMPORT = 1024 * 1024;
 const plain = v => v !== null && typeof v === 'object' && !Array.isArray(v) && [Object.prototype, null].includes(Object.getPrototypeOf(v));
 const allowed = (o, keys) => plain(o) && Object.keys(o).every(k => keys.includes(k));
@@ -26,10 +27,8 @@ export function validateState(value, course) {
     if (!allowed(value.preferences,['platform','largeText']) || !['linux','windows','macos'].includes(value.preferences.platform) || typeof value.preferences.largeText !== 'boolean') throw new Error('Preferencias inválidas.');
     output.preferences = {...value.preferences};
   }
-  if (typeof value.lastRoute === 'string' && /^#\/modulo\/M\d{2}(?:\/(?:practicas|revision|practica\/L\d{2}[ABC]))?$/.test(value.lastRoute)) {
-    const parts=value.lastRoute.split('/'); const module=course.modules.find(m=>m.id===parts[2]);
-    if (module && (!parts[4] || module.labs.some(l=>l.id===parts[4]))) output.lastRoute=value.lastRoute;
-  }
+  const resume = validResumeRoute(value.lastRoute, course);
+  if (resume) output.lastRoute = resume;
   if (typeof value.updatedAt === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value.updatedAt) && Number.isFinite(Date.parse(value.updatedAt))) output.updatedAt=value.updatedAt;
   return output;
 }
@@ -54,4 +53,12 @@ export function escapeHTML(value) {return String(value).replace(/[&<>"']/g,c=>({
 export function nextLabStep(lab) {
   const pending = lab.steps.findIndex(value => !value);
   return pending < 0 ? lab.steps.length - 1 : pending;
+}
+
+/** Validate both imported and tab-local routes against the actual course. */
+export function validResumeRoute(route, course) {
+  if (typeof route !== 'string' || !/^#\/modulo\/M\d{2}(?:\/(?:practicas|revision|practica\/L\d{2}[ABC]))?$/.test(route)) return null;
+  const parts=route.split('/');
+  const module=course.modules.find(m=>m.id===parts[2]);
+  return module && (!parts[4] || module.labs.some(l=>l.id===parts[4])) ? route : null;
 }
