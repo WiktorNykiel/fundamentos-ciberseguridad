@@ -1,0 +1,44 @@
+name: Prepare reviewed bilingual source
+on:
+  push:
+    branches: [feat/bilingual-campus-handoff]
+    paths: [.github/workflows/prepare-editorial-source.yml]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    if: github.repository == 'WiktorNykiel/fundamentos-ciberseguridad' && github.ref == 'refs/heads/feat/bilingual-campus-handoff'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Apply reviewed source preimages and explicit English overrides
+        run: |
+          python campus/tools/apply_editorial.py
+          python campus/tools/review_english.py
+          python -m compileall -q campus
+          node --check campus/assets/app.js
+          node --test campus/tests/*.test.mjs
+      - name: Commit only the reviewed source outputs to this feature branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          current=$(gh api repos/WiktorNykiel/fundamentos-ciberseguridad/git/ref/heads/feat/bilingual-campus-handoff --jq .object.sha)
+          test "$current" = "$EXPECTED_SHA"
+          git config user.name 'Wiktor Nykiel'
+          git config user.email 'WiktorNykiel@users.noreply.github.com'
+          git add -- campus/assets/app.js campus/assets/catalog.js campus/assets/navigation.js campus/index.html campus/build.py campus/check_release.py campus/provenance.py campus/package.json campus/tests/browser.py campus/tests/cloudflare_smoke.py campus/translations.py campus/assets/i18n.js campus/locales/en-overrides.json
+          git diff --cached --stat
+          git commit -m 'feat: apply reviewed bilingual campus source and English assessment overrides'
+          gh auth setup-git
+          git push origin HEAD:refs/heads/feat/bilingual-campus-handoff
