@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 
 LOCALES = Path(__file__).parent / 'locales'
-TEXT_KEYS = {'title', 'description', 'environment', 'tasks', 'evidence', 'success', 'recovery', 'question', 'explanation'}
+TEXT_KEYS = {'title', 'description', 'environment', 'tasks', 'evidence', 'success', 'recovery', 'question', 'explanation', 'kind'}
 PROTECTED = {'pre', 'code', 'script', 'style', 'kbd', 'samp'}
 
 def key(text: str) -> str:

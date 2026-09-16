@@ -12,7 +12,7 @@ HERE=Path(__file__).resolve().parent
 def validate(directory: Path, archive: Path) -> dict:
     if directory.is_symlink() or not directory.is_dir():
         raise ValueError('La salida debe ser un directorio regular.')
-    required={'index.html','course.json','lectura.html','_headers','build-info.json','assets/app.js','assets/state.js','assets/navigation.js','assets/styles.css','SHA256SUMS.txt','404.html','assets/catalog.js','assets/catalog.css'}
+    required={'index.html','course.json','lectura.html','_headers','build-info.json','assets/app.js','assets/state.js','assets/navigation.js','assets/styles.css','SHA256SUMS.txt','404.html','assets/catalog.js','assets/catalog.css','assets/editorial.css','assets/i18n.js','assets/handoff.js','assets/devices.js','course.en.json','reading.html'}
     files={p.relative_to(directory).as_posix():p for p in directory.rglob('*') if p.is_file() and not p.name.startswith('.')}
     if any(p.is_symlink() for p in directory.rglob('*')): raise ValueError('No se admiten enlaces simbólicos.')
     if not required <= files.keys(): raise ValueError('Faltan activos: '+', '.join(sorted(required-files.keys())))
@@ -33,11 +33,20 @@ def validate(directory: Path, archive: Path) -> dict:
         raise ValueError('Identidad o carga curricular incorrecta.')
     labs=[l for m in course['modules'] for l in m['labs']]
     if len(labs)!=96 or len({l['id'] for l in labs})!=96: raise ValueError('Catálogo de prácticas incorrecto.')
+    english=json.loads(files['course.en.json'].read_text())
+    if english.get('language')!='en' or english.get('id')!=course['id'] or english.get('hours')!=course['hours']:
+        raise ValueError('English catalogue identity mismatch.')
+    if [m['id'] for m in english['modules']] != [m['id'] for m in course['modules']]:
+        raise ValueError('English module identifiers mismatch.')
+    if [l['id'] for m in english['modules'] for l in m['labs']] != [l['id'] for l in labs]:
+        raise ValueError('English lab identifiers mismatch.')
+    for lang, page in [('es','lectura.html'),('en','reading.html')]:
+        if f'lang="{lang}"' not in files[page].read_text(): raise ValueError('Reader language mismatch.')
     headers=files['_headers'].read_text()
     for value in ["script-src 'self'","object-src 'none'","frame-ancestors 'none'",'nosniff']:
         if value not in headers: raise ValueError('Falta una protección: '+value)
     if 'unsafe-inline' in headers or 'unsafe-eval' in headers: raise ValueError('CSP permisiva.')
-    for rel in ('index.html','lectura.html'):
+    for rel in ('index.html','lectura.html','reading.html'):
         text=files[rel].read_text()
         for target in re.findall(r'(?:src|href)="([^"]+)"',text):
             if target.startswith(('https://','#','./')): continue

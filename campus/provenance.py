@@ -29,7 +29,7 @@ def source_commit(root: Path) -> str | None:
             if (name.startswith('formacion/sistemas-operativos/')
                     and path.suffix.lower() in {'.md', '.json', '.py', '.yaml', '.bash', '.ps1', '.cmd', '.zsh'}):
                 return None
-            if (name.startswith('campus/assets/')
+            if (name.startswith(('campus/assets/','campus/locales/'))
                     or (len(parts) == 2 and parts[0] == 'campus' and path.suffix in {'.py', '.html'})):
                 return None
         head = subprocess.run(['git', 'rev-parse', 'HEAD'], **options).stdout.strip()

@@ -230,7 +230,7 @@ def collect(course: Path = COURSE) -> dict:
                           'kind':'Lección ampliada' if path.parent.name == 'lecciones' else 'Referencia',
                           'source':REPO+'/blob/main/'+quote(source,safe='/'), **markdown(raw, source, 'D'+str(index+1))})
     blocks = [{'id':b[0], 'title':b[1], 'description':b[4], 'hours':sum(m['hours'] for m in modules if m['block']==b[0])} for b in BLOCKS]
-    result = {'id':'fundamentos-ciberseguridad', 'version':'2.2.0', 'repository':REPO, 'modules':modules,
+    result = {'id':'fundamentos-ciberseguridad', 'version':'2.3.0', 'repository':REPO, 'modules':modules,
               'blocks':blocks, 'resources':resources, 'hours':sum(m['hours'] for m in modules)}
     if result['hours'] != 480 or sum(m['theoryHours'] for m in modules)!=168: raise ValueError('Carga incoherente.')
     route_content(result)
@@ -261,33 +261,51 @@ def route_content(data: dict) -> None:
             if 'guide' in lab: lab['guide']['html']=rewrite(lab['guide']['html'])
 
 
+def reading_page(data: dict, lang: str) -> str:
+    english = lang == 'en'
+    title = 'Cybersecurity foundations' if english else 'Fundamentos de ciberseguridad'
+    label = 'Continuous reading · 32 modules · 480 planned hours' if english else 'Lectura continua · 32 módulos · 480 horas planificadas'
+    home = 'Back to the campus' if english else 'Volver al campus'
+    body = f'<header><p>Wiktor Nykiel · ES / EN</p><h1>{title}</h1><p>{label}</p><a href="./?lang={lang}">{home}</a> · <a href="lectura.html" lang="es">Español</a> · <a href="reading.html" lang="en">English</a></header>'
+    if english:
+        body += '<p class="language-note">English is a machine-assisted editorial edition. Structure, identifiers and command blocks are checked against the Spanish source. Technical proofreading is an ongoing process; consult the Spanish source for ambiguity.</p>'
+    body += '<nav aria-label="Index">'+''.join(f'<a href="#{m["id"]}">{m["id"]} · {esc(m["title"])}</a><br>' for m in data['modules'])+'</nav>'
+    for m in data['modules']:
+        body += f'<article id="{m["id"]}"><h1>{m["id"]} · {esc(m["title"])}</h1>{m["html"]}'
+        body += ''.join(f'<section id="{lab["id"]}"><h2>{lab["id"]} · {esc(lab["title"])}</h2>{lab["html"]}</section>' for lab in m['labs'])
+        q = m['quiz']
+        body += '<section><h2>'+('Self-assessment' if english else 'Autoevaluación')+'</h2><p>'+esc(q['question'])+'</p><ol>'+''.join('<li>'+esc(option)+'</li>' for option in q['options'])+'</ol><details><summary>'+('Explanation' if english else 'Explicación')+'</summary><p>'+esc(q['explanation'])+'</p></details></section></article>'
+    for r in data['resources']:
+        body += f'<article id="{r["id"]}"><h1>{esc(r["title"])}</h1>{r["html"]}</article>'
+    body = re.sub(r'href="#/modulo/M\d{2}/practica/(L\d{2}[ABC])"',r'href="#\1"',body)
+    body = re.sub(r'href="#/(?:modulo|recurso)/(M\d{2}|D\d{2})(?:/(?:revision|practicas))?"',r'href="#\1"',body)
+    return '<!doctype html><html lang="'+lang+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+title+'</title><link rel="stylesheet" href="assets/styles.css"><link rel="stylesheet" href="assets/editorial.css"></head><body class="print-reader"><main>'+body+'</main></body></html>'
+
+
 def build() -> dict:
     commit = source_commit(ROOT)
-    data = collect(); out = HERE/'dist'
+    data = collect(); data['language']='es'
+    from translations import english
+    data_en = english(data)
+    out = HERE/'dist'
     if out.is_symlink(): raise ValueError('dist no puede ser un enlace.')
     if out.exists() and not (out/'.campus-generated').is_file(): raise ValueError('dist no pertenece al generador.')
     stage = Path(tempfile.mkdtemp(prefix='.campus-build-', dir=HERE))
     try:
         (stage/'assets').mkdir()
-        for name in ['app.js','state.js','navigation.js','catalog.js','styles.css','catalog.css']:
+        for name in ['app.js','state.js','navigation.js','catalog.js','styles.css','catalog.css','i18n.js','handoff.js','devices.js','editorial.css']:
             shutil.copyfile(HERE/'assets'/name, stage/'assets'/name)
         page = read_text(HERE/'index.html')
         (stage/'index.html').write_text(page,encoding='utf-8')
-        (stage/'404.html').write_text('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>No encontrado · Campus</title><link rel="stylesheet" href="/assets/styles.css"></head><body class="print-reader"><main><h1>No se encontró ese archivo.</h1><p>Las secciones del campus se navegan desde el índice.</p><a href="/#/temario">Abrir el temario completo</a></main></body></html>',encoding='utf-8')
+        (stage/'404.html').write_text('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>No encontrado · Campus</title><link rel="stylesheet" href="/assets/styles.css"></head><body class="print-reader"><main><h1>No se encontró ese archivo. / File not found.</h1><p>Las secciones del campus se navegan desde el índice.</p><a href="/#/temario">Abrir el temario / Open the course index</a></main></body></html>',encoding='utf-8')
         (stage/'.assetsignore').write_text('.campus-generated\n',encoding='utf-8')
+        (stage/'course.en.json').write_text(json.dumps(data_en,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
         (stage/'course.json').write_text(json.dumps(data,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
         (stage/'_headers').write_text('/*\n  Content-Security-Policy: '+CSP+'\n  X-Content-Type-Options: nosniff\n  X-Frame-Options: DENY\n  Referrer-Policy: no-referrer\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n  Cache-Control: no-cache\n',encoding='utf-8')
         (stage/'robots.txt').write_text('User-agent: *\nAllow: /\n',encoding='utf-8')
-        (stage/'favicon.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#0f5e54"/><path d="m16 20 12 12-12 12m20 0h13" fill="none" stroke="white" stroke-width="5"/></svg>',encoding='utf-8')
-        body = '<header><p>Wiktor Nykiel · Formación independiente</p><h1>Fundamentos de ciberseguridad</h1><p>Lectura continua · 32 módulos · 480 horas planificadas.</p><a href="./">Volver al campus</a></header><nav aria-label="Índice">'
-        body += ''.join(f'<a href="#{m["id"]}">{m["id"]} · {esc(m["title"])}</a><br>' for m in data['modules']) + '</nav>'
-        for m in data['modules']:
-            body += f'<article id="{m["id"]}"><h1>{m["id"]} · {esc(m["title"])}</h1>{m["html"]}'
-            body += ''.join(f'<section><h2>{lab["id"]} · {esc(lab["title"])}</h2>{lab["html"]}</section>' for lab in m['labs'])+'</article>'
-        for r in data['resources']:
-            body += f'<article id="{r["id"]}"><h1>{esc(r["title"])}</h1>{r["html"]}</article>'
-        body = re.sub(r'href="#/(?:modulo|recurso)/(M\d{2}|D\d{2})"', r'href="#\1"', body)
-        (stage/'lectura.html').write_text('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lectura · Fundamentos de ciberseguridad</title><link rel="stylesheet" href="assets/styles.css"><body class="print-reader"><main>'+body+'</main></body></html>',encoding='utf-8')
+        (stage/'favicon.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#b5122d"/><path d="m16 20 12 12-12 12m20 0h13" fill="none" stroke="white" stroke-width="5"/></svg>',encoding='utf-8')
+        (stage/'lectura.html').write_text(reading_page(data,'es'),encoding='utf-8')
+        (stage/'reading.html').write_text(reading_page(data_en,'en'),encoding='utf-8')
         (stage/'descargas').mkdir()
         with zipfile.ZipFile(stage/'descargas/kit-laboratorio.zip','w',zipfile.ZIP_DEFLATED) as archive:
             for path in public_kit_files(COURSE/'kit'):
@@ -302,6 +320,9 @@ def build() -> dict:
     report={'modules':len(data['modules']),'labs':sum(len(m['labs']) for m in data['modules']),
             'resources':len(data['resources']),'slides':sum(len(m['slides']) for m in data['modules']),
             'guidedLabs':sum('guide' in lab for m in data['modules'] for lab in m['labs']), 'hours':data['hours']}
+    report['languages']=['es','en']
+    report['englishSegments']=data_en['translation']['segments']
+    report['englishCourseSha256']=hashlib.sha256((out/'course.en.json').read_bytes()).hexdigest()
     report['version']=data['version']
     report['sourceCommit']=commit
     report['courseSha256']=hashlib.sha256((out/'course.json').read_bytes()).hexdigest()

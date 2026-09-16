@@ -23,7 +23,11 @@ class BrowserTests(unittest.TestCase):
             try:
                 with socket.create_connection(('127.0.0.1',cls.port),timeout=.2):break
             except OSError:time.sleep(.1)
-        cls.p=sync_playwright().start();cls.browser=cls.p.chromium.launch(headless=True,executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or None)
+        cls.p=sync_playwright().start();engine=os.environ.get('BROWSER_ENGINE','chromium')
+        if engine not in ('chromium','webkit'):raise ValueError('Unsupported test browser')
+        options={'headless':True}
+        if engine=='chromium' and os.environ.get('CHROMIUM_EXECUTABLE'):options['executable_path']=os.environ['CHROMIUM_EXECUTABLE']
+        cls.browser=getattr(cls.p,engine).launch(**options)
         (HERE/'qa/screenshots').mkdir(parents=True,exist_ok=True)
     @classmethod
     def tearDownClass(cls):

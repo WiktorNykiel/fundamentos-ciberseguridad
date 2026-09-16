@@ -4,7 +4,7 @@ import './catalog.js';
 export const normalise = value => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const href = id => '#/modulo/' + id;
 export function introHTML(course) {
-  const source = course.resources.find(r => r.title.startsWith('Cómo estudiar'));
+  const source = course.resources.find(r => r.source?.includes('COMO-ESTUDIAR.md') || r.title.startsWith('Cómo estudiar'));
   return `<p class="eyebrow">Tu punto de partida</p><h1>Empieza por aquí.</h1>
   <p class="lead">Un mismo recorrido para leer, presentar, practicar y demostrar lo aprendido. No necesitas instalar el campus en cada máquina del laboratorio.</p>
   <div class="blocks">

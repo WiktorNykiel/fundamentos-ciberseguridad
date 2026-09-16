@@ -287,7 +287,7 @@ const rules = [
 ];
 export function t(value) {
  if(lang!=='en' || typeof value!=='string')return value;
- const s=value.trim();let answer=EN[s];
+ const s=value.trim();let answer=Object.hasOwn(EN,s)?EN[s]:undefined;
  if(answer===undefined){for(const [re,convert] of rules){if(re.test(s)){answer=s.replace(re,convert);break;}}}
  return answer===undefined?value:value.slice(0,value.length-value.trimStart().length)+answer+value.slice(value.trimEnd().length);
 }

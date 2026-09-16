@@ -1,3 +1,4 @@
+import {t} from './i18n.js';
 /** Filters for the canonical outline. No persistence, network or execution. */
 export const normalise = value => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 export function matches(row, filters) {
@@ -20,7 +21,7 @@ export function applyFilters(root) {
   for (const section of root.querySelectorAll('[data-outline-section]')) {
     section.hidden = ![...section.querySelectorAll('[data-outline-row]')].some(row => !row.hidden);
   }
-  root.querySelector('#outline-count').textContent = `${shown} de ${rows.length} módulos visibles.`;
+  root.querySelector('#outline-count').textContent = t(`${shown} de ${rows.length} módulos visibles.`);
   root.querySelector('#outline-empty').hidden = shown !== 0;
 }
 if (typeof document !== 'undefined') {

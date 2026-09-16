@@ -25,10 +25,13 @@ with urlopen(BASE+'/course.json',timeout=5) as r:
     assert len(data['modules'])==32 and data['hours']==480
     assert len(data['resources'])==21
 with urlopen(BASE+'/build-info.json',timeout=5) as r:
-    info=json.load(r);assert info['version']=='2.2.0'
+    info=json.load(r);assert info['version']==json.loads((Path(__file__).resolve().parents[1]/'package.json').read_text())['version']
+    assert info['languages']==['es','en']
     root=Path(__file__).resolve().parents[2]
     expected=subprocess.run(['git','rev-parse','HEAD'],cwd=root,check=True,capture_output=True,text=True,timeout=5).stdout.strip()
     assert info['sourceCommit']==expected, 'The runtime must serve the actual clean checkout commit.'
+with urlopen(BASE+'/course.en.json',timeout=5) as r:
+    english=json.load(r);assert english['language']=='en' and len(english['modules'])==32
 with urlopen(BASE+'/assets/catalog.js',timeout=5) as r:
     assert 'javascript' in r.headers.get('Content-Type','')
 try:

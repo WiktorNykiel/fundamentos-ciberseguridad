@@ -2,13 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="description" content="Aprende sistemas operativos y fundamentos de ciberseguridad: Linux, Windows, macOS, terminal y prácticas guiadas. Formación de Wiktor Nykiel.">
   <meta name="color-scheme" content="light">
   <title>Fundamentos de ciberseguridad · Wiktor Nykiel</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/styles.css">
   <link rel="stylesheet" href="assets/catalog.css">
+  <link rel="stylesheet" href="assets/editorial.css">
   <script type="module" src="assets/app.js"></script>
 </head>
 <body>
@@ -16,10 +17,10 @@
   <header class="topbar">
     <a class="brand" href="#/curso" aria-label="Fundamentos de ciberseguridad, inicio"><span class="brand-mark" aria-hidden="true">&gt;_</span><span>Fundamentos<span class="brand-sub">DE CIBERSEGURIDAD</span></span></a>
     <div class="search-wrap"><label class="sr-only" for="global-search">Buscar en el curso</label><input id="global-search" type="search" placeholder="Buscar teoría, prácticas o referencias…" autocomplete="off"><span class="search-hint" aria-hidden="true">/</span></div>
-    <div class="top-actions"><a href="#/progreso" class="quiet" id="top-progress">Mi progreso</a><button id="menu-toggle" class="icon-button" aria-controls="sidebar" aria-expanded="false">Menú</button></div>
+    <div class="top-actions"><label class="language-control"><span class="sr-only">Idioma / Language</span><select id="language-select" aria-label="Idioma / Language"><option value="es" lang="es">Español</option><option value="en" lang="en">English</option></select></label><a href="#/progreso" class="quiet" id="top-progress">Mi progreso</a><button id="menu-toggle" class="icon-button" aria-controls="sidebar" aria-expanded="false">Menú</button></div>
   </header>
   <div class="shell">
-    <aside class="sidebar" id="sidebar" aria-label="Navegación del curso"><nav id="navigation" aria-label="Índice del curso"><p>Cargando índice…</p></nav><div class="sidebar-foot"><strong>Wiktor Nykiel</strong><span>Formación independiente · Español</span><span>Tu avance se guarda en este navegador.</span><a class="publish-link" href="#/recurso/D21">Publicar y verificar el campus →</a></div></aside>
+    <aside class="sidebar" id="sidebar" aria-label="Navegación del curso"><nav id="navigation" aria-label="Índice del curso"><p>Cargando índice…</p></nav><div class="sidebar-foot"><strong>Wiktor Nykiel</strong><span>Formación independiente · ES / EN</span><span>Tu avance se guarda en este navegador.</span><a class="publish-link" href="#/recurso/D21">Publicar y verificar el campus →</a></div></aside>
     <main id="main" tabindex="-1"><div class="loading"><h1>Preparando el curso</h1><p>Los contenidos se cargan desde este mismo sitio.</p></div></main>
   </div>
   <div id="status" class="toast" role="status" aria-live="polite" hidden></div>
@@ -30,6 +31,6 @@
   </dialog>
   <dialog id="reset-dialog" aria-labelledby="reset-title"><div class="dialog-body"><h2 id="reset-title">¿Borrar el progreso de este navegador?</h2><p>Se eliminarán las marcas, notas y favoritos del curso. Exporta una copia antes de continuar. No afecta a otros navegadores.</p><div class="button-row"><button id="cancel-reset" class="button secondary">Conservar progreso</button><button id="confirm-reset" class="button danger">Borrar mi progreso</button></div></div></dialog>
   <input id="import-file" type="file" accept="application/json,.json" hidden>
-  <noscript><div class="noscript"><h1>Lectura sin JavaScript</h1><p>El seguimiento y el asistente necesitan JavaScript. <a href="lectura.html">Abrir la guía de lectura completa, con índice e impresión.</a></p></div></noscript>
+  <noscript><div class="noscript"><h1>Lectura sin JavaScript</h1><p>El seguimiento y el asistente necesitan JavaScript. <a href="lectura.html">Abrir la guía de lectura completa, con índice e impresión.</a></p></div><p lang="en"><a href="reading.html">Open the English reading guide without JavaScript.</a></p></noscript>
 </body>
 </html>
