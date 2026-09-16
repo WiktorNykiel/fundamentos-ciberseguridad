@@ -14,7 +14,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,32 +30,45 @@ jobs:
         run: mkdir -p campus/qa
       - name: Retained PR ancestry
         run: python3 scripts/verify_pr_ancestry.py
-      - name: Compiler and release unit tests
+      - name: Compiler, bilingual coverage and release unit tests
         shell: bash
         run: |
           set -o pipefail
           python3 -m unittest discover -s campus/tests -p 'test_*.py' -v 2>&1 | tee campus/qa/compiler.log
-      - name: Progress and navigation tests
+      - name: Progress, navigation, language and device transfer tests
         shell: bash
         run: |
           set -o pipefail
           node --test campus/tests/*.test.mjs 2>&1 | tee campus/qa/state.log
           node --check campus/assets/app.js
-      - name: Compile and validate real course
+          node --check campus/assets/devices.js
+      - name: Compile and validate both languages
         shell: bash
         run: |
           set -o pipefail
           python3 campus/build.py | tee campus/qa/build.json
           python3 campus/check_release.py | tee campus/qa/release.json
-      - name: Install browser test dependency
+      - name: Install browser test dependencies
+        id: browsers
         run: |
           python3 -m pip install playwright==1.55.0
-          python3 -m playwright install --with-deps chromium
-      - name: Browser acceptance
+          python3 -m playwright install --with-deps chromium webkit
+      - name: Chromium bilingual and device acceptance
+        if: ${{ !cancelled() && steps.browsers.outcome == 'success' }}
+        env:
+          BROWSER_ENGINE: chromium
         shell: bash
         run: |
           set -o pipefail
-          python3 campus/tests/browser_extra.py 2>&1 | tee campus/qa/browser.log
+          python3 campus/tests/browser_bilingual.py 2>&1 | tee campus/qa/browser-chromium.log
+      - name: WebKit bilingual and device acceptance
+        if: ${{ !cancelled() && steps.browsers.outcome == 'success' }}
+        env:
+          BROWSER_ENGINE: webkit
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 campus/tests/browser_bilingual.py 2>&1 | tee campus/qa/browser-webkit.log
       - name: Existing kit tests
         working-directory: formacion/sistemas-operativos/kit
         run: python3 -m unittest discover -p 'test_*.py' -v
