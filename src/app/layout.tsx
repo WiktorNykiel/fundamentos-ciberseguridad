@@ -6,18 +6,7 @@ export const metadata: Metadata = {
   description: "Aplicación de referencia. El campus estático se compila desde campus/.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="es">
-      <body
-        className="antialiased"
-      >
-        {children}
-      </body>
-    </html>
-  );
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // The preserved reference page is English; the independent campus is Spanish.
+  return <html lang="en"><body className="antialiased">{children}</body></html>;
 }

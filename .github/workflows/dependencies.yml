@@ -26,17 +26,20 @@ jobs:
           node-version: '22'
           cache: npm
       - name: Reproducible install without lifecycle scripts
+        id: install
         run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:dependencies
       - run: npm run build
       - name: Audit production dependencies
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         shell: bash
         run: |
           set -o pipefail
           npm audit --omit=dev --audit-level=high --json | tee dependency-audit-production.json
       - name: Audit development and production dependencies
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         shell: bash
         run: |
           set -o pipefail
