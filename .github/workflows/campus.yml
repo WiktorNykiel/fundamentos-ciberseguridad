@@ -1,10 +1,10 @@
 name: Campus - build and acceptance
 on:
   push:
-    branches: ['main', 'feat/campus-web-v2']
-    paths: ['campus/**', 'formacion/sistemas-operativos/**', '.github/workflows/campus.yml']
+    branches: [main, feat/campus-web-v2, maintenance/review-integration-20260915]
+    paths: ['campus/**', 'formacion/sistemas-operativos/**', 'scripts/verify_pr_ancestry.py', '.github/workflows/campus.yml', 'package.json', 'package-lock.json']
   pull_request:
-    paths: ['campus/**', 'formacion/sistemas-operativos/**', '.github/workflows/campus.yml']
+    paths: ['campus/**', 'formacion/sistemas-operativos/**', 'scripts/verify_pr_ancestry.py', '.github/workflows/campus.yml', 'package.json', 'package-lock.json']
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,6 +19,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -27,22 +28,25 @@ jobs:
           node-version: '22'
       - name: Prepare reports
         run: mkdir -p campus/qa
-      - name: Compiler unit tests
+      - name: Retained PR ancestry
+        run: python3 scripts/verify_pr_ancestry.py
+      - name: Compiler and release unit tests
         shell: bash
         run: |
           set -o pipefail
           python3 -m unittest discover -s campus/tests -p 'test_*.py' -v 2>&1 | tee campus/qa/compiler.log
-      - name: Progress state tests
+      - name: Progress and navigation tests
         shell: bash
         run: |
           set -o pipefail
-          node --test campus/tests/state.test.mjs 2>&1 | tee campus/qa/state.log
+          node --test campus/tests/*.test.mjs 2>&1 | tee campus/qa/state.log
           node --check campus/assets/app.js
-      - name: Compile real course
+      - name: Compile and validate real course
         shell: bash
         run: |
           set -o pipefail
           python3 campus/build.py | tee campus/qa/build.json
+          python3 campus/check_release.py | tee campus/qa/release.json
       - name: Install browser test dependency
         run: |
           python3 -m pip install playwright==1.55.0
@@ -58,8 +62,21 @@ jobs:
       - name: Existing planning tests
         working-directory: formacion/sistemas-operativos/planificacion
         run: python3 -m unittest discover -p 'test_*.py' -v
-      - name: Verified site, reports and source snapshot
+      - name: Diagnostics, including failures
         if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: campus-diagnostics
+          path: campus/qa/
+          retention-days: 7
+      - name: Pages bundle after successful acceptance
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudflare-pages-ready
+          path: campus/pages-ready.zip
+          retention-days: 14
+          if-no-files-found: error
+      - name: Verified source and site snapshot
         uses: actions/upload-artifact@v4
         with:
           name: campus-web-v2
@@ -67,9 +84,10 @@ jobs:
             campus/
             formacion/sistemas-operativos/
             README.md
+            scripts/verify_pr_ancestry.py
             .github/workflows/campus.yml
             !**/__pycache__/**
             !**/*.pyc
           include-hidden-files: true
-          retention-days: 7
+          retention-days: 14
           if-no-files-found: error
