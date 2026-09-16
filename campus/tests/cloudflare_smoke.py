@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Read-only HTTP smoke test for an explicitly started local Wrangler runtime."""
 import json
+import subprocess
 import time
+from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
@@ -24,6 +26,9 @@ with urlopen(BASE+'/course.json',timeout=5) as r:
     assert len(data['resources'])==21
 with urlopen(BASE+'/build-info.json',timeout=5) as r:
     info=json.load(r);assert info['version']=='2.2.0'
+    root=Path(__file__).resolve().parents[2]
+    expected=subprocess.run(['git','rev-parse','HEAD'],cwd=root,check=True,capture_output=True,text=True,timeout=5).stdout.strip()
+    assert info['sourceCommit']==expected, 'The runtime must serve the actual clean checkout commit.'
 with urlopen(BASE+'/assets/catalog.js',timeout=5) as r:
     assert 'javascript' in r.headers.get('Content-Type','')
 try:
@@ -31,4 +36,4 @@ try:
     raise AssertionError('Una ruta inexistente no debe devolver éxito HTML.')
 except HTTPError as e:
     assert e.code==404
-print(json.dumps({'status':'passed','runtime':'wrangler-local','checks':5,'remoteDeployment':False}))
+print(json.dumps({'status':'passed','runtime':'wrangler-local','checks':5,'sourceCommit':info['sourceCommit'],'remoteDeployment':False}))
