@@ -39,6 +39,20 @@ class ProvenanceTests(unittest.TestCase):
     def test_no_git_has_no_source_commit(self):
         shutil.rmtree(self.root/'.git')
         self.assertIsNone(source_commit(self.root))
+    def test_ignored_laboratory_input_is_not_attributed(self):
+        course=self.root/'formacion/sistemas-operativos';course.mkdir(parents=True)
+        (course/'.gitignore').write_text('mi-laboratorio*/\n')
+        self.git('add','.');self.git('-c','user.name=Test','-c','user.email=test@example.invalid','commit','-qm','ignore fixture')
+        local=course/'kit/mi-laboratorio-local';local.mkdir(parents=True)
+        (local/'notes.md').write_text('private local fixture')
+        self.assertEqual(self.git('status','--porcelain'),'')
+        self.assertIsNone(source_commit(self.root))
+    def test_ignored_lesson_input_is_not_attributed(self):
+        course=self.root/'formacion/sistemas-operativos';course.mkdir(parents=True)
+        (course/'.gitignore').write_text('lecciones/local*.md\n')
+        self.git('add','.');self.git('-c','user.name=Test','-c','user.email=test@example.invalid','commit','-qm','ignore fixture')
+        local=course/'lecciones';local.mkdir();(local/'local.md').write_text('fixture')
+        self.assertIsNone(source_commit(self.root))
     def test_build_checks_before_collecting_or_writing(self):
         order=[]
         with patch.object(build,'source_commit',side_effect=lambda root:order.append('provenance')):

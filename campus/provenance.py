@@ -16,6 +16,22 @@ def source_commit(root: Path) -> str | None:
         status = subprocess.run(['git', 'status', '--porcelain=v1', '--untracked-files=all'], **options)
         if status.stdout.strip():
             return None
+        ignored = subprocess.run(
+            ['git', 'ls-files', '--others', '--ignored', '--exclude-standard', '-z', '--',
+             'formacion/sistemas-operativos', 'campus'], **options)
+        for name in ignored.stdout.split('\0'):
+            path = Path(name)
+            parts = path.parts
+            if '__pycache__' in parts:
+                continue
+            # Conservative for course data; ignored local inputs must not be
+            # attributed to HEAD. Generated campus output and test logs differ.
+            if (name.startswith('formacion/sistemas-operativos/')
+                    and path.suffix.lower() in {'.md', '.json', '.py', '.yaml', '.bash', '.ps1', '.cmd', '.zsh'}):
+                return None
+            if (name.startswith('campus/assets/')
+                    or (len(parts) == 2 and parts[0] == 'campus' and path.suffix in {'.py', '.html'})):
+                return None
         head = subprocess.run(['git', 'rev-parse', 'HEAD'], **options).stdout.strip()
         return head if re.fullmatch(r'[0-9a-f]{40}', head) else None
     except (OSError, subprocess.SubprocessError):

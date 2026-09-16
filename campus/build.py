@@ -12,6 +12,7 @@ from pathlib import Path
 from urllib.parse import quote, urlsplit
 from content import notes_and_quizzes
 from provenance import source_commit
+from release_inputs import public_kit_files
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -288,12 +289,10 @@ def build() -> dict:
         body = re.sub(r'href="#/(?:modulo|recurso)/(M\d{2}|D\d{2})"', r'href="#\1"', body)
         (stage/'lectura.html').write_text('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lectura · Fundamentos de ciberseguridad</title><link rel="stylesheet" href="assets/styles.css"><body class="print-reader"><main>'+body+'</main></body></html>',encoding='utf-8')
         (stage/'descargas').mkdir()
-        allowed = {'.py','.bash','.ps1','.cmd','.zsh','.md','.yaml','.html','.css'}
         with zipfile.ZipFile(stage/'descargas/kit-laboratorio.zip','w',zipfile.ZIP_DEFLATED) as archive:
-            for path in sorted((COURSE/'kit').rglob('*')):
-                if path.is_file() and not path.is_symlink() and path.suffix.lower() in allowed and not path.name.startswith('test_'):
-                    info=zipfile.ZipInfo('kit/'+path.relative_to(COURSE/'kit').as_posix(),(2026,9,14,0,0,0)); info.compress_type=zipfile.ZIP_DEFLATED
-                    archive.writestr(info, path.read_bytes())
+            for path in public_kit_files(COURSE/'kit'):
+                info=zipfile.ZipInfo('kit/'+path.name,(2026,9,14,0,0,0)); info.compress_type=zipfile.ZIP_DEFLATED
+                archive.writestr(info, path.read_bytes())
         (stage/'.campus-generated').write_text('campus-v2\n')
         if out.exists(): shutil.rmtree(out)
         stage.rename(out)
