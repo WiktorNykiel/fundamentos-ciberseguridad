@@ -12,7 +12,7 @@ HERE=Path(__file__).resolve().parent
 def validate(directory: Path, archive: Path) -> dict:
     if directory.is_symlink() or not directory.is_dir():
         raise ValueError('La salida debe ser un directorio regular.')
-    required={'index.html','course.json','lectura.html','_headers','build-info.json','assets/app.js','assets/state.js','assets/navigation.js','assets/styles.css','SHA256SUMS.txt'}
+    required={'index.html','course.json','lectura.html','_headers','build-info.json','assets/app.js','assets/state.js','assets/navigation.js','assets/styles.css','SHA256SUMS.txt','404.html','assets/catalog.js','assets/catalog.css'}
     files={p.relative_to(directory).as_posix():p for p in directory.rglob('*') if p.is_file() and not p.name.startswith('.')}
     if any(p.is_symlink() for p in directory.rglob('*')): raise ValueError('No se admiten enlaces simbólicos.')
     if not required <= files.keys(): raise ValueError('Faltan activos: '+', '.join(sorted(required-files.keys())))

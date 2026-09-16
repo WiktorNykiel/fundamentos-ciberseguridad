@@ -1,39 +1,35 @@
-# Aceptación del campus y preparación de Pages
+# Aceptación del campus y preparación de Cloudflare
 
-## Campus 2.1 · 16 de septiembre de 2026
+## Edición 2.2: alcance de las nuevas comprobaciones
 
-El commit `d03f94062ed7ce887fe1ca0f7badb950c0eb84a2` superó el workflow [35089428413](https://github.com/WiktorNykiel/fundamentos-ciberseguridad/actions/runs/35089428413): compilación del curso real, validador de release, pruebas de estado/navegación, aceptación Chromium y regresiones del kit y planificación. La revisión posterior de este documento vuelve a ejecutar la CI; la conclusión de cada head se consulta en Actions.
+Se añaden 13 contratos offline del wrapper de despliegue y conservación de rutas D01–D20, y ocho pruebas de filtros del índice. Las 31 pruebas de navegador existentes se amplían con cinco casos: filtrado por bloque, texto y progreso, estado vacío/reinicio, nueva lección D21 y filtros en móvil.
 
-| Grupo | Casos definidos y ejecutados en esa aceptación |
-|---|---:|
-| Compilador y release | 26 |
-| Estado e importación | 22 |
-| Navegación | 8 |
-| Chromium: escritorio, presentación, prácticas, móvil y pestañas | 30 |
-| **Campus** | **86** |
+El workflow `Cloudflare - static deployment acceptance` usa Wrangler 4.132.0 con `--dry-run` y runtime `--local`, sin credenciales Cloudflare ni cambios remotos. Comprueba contenido, MIME, CSP y HTTP 404. Los resultados se consultan en la ejecución concreta; ningún workflow de esta edición publica en una cuenta. Las pruebas unitarias no demuestran que el runtime o navegador se haya ejecutado.
 
-Se mantienen las regresiones independientes del kit y de planificación. Estas cifras no son horas impartidas, pruebas de penetración ni prácticas nativas Windows/macOS ejecutadas.
+El catálogo mantiene M01–M32, 96 fichas, 480 horas (168 teoría/312 práctica), ocho guías ampliadas y 170 secciones de presentación. La biblioteca pasa a 21 referencias sin alterar el significado de D01–D20. El índice permite filtros sin modificar el progreso.
 
 ## Qué se comprueba
 
-Catálogo de M01–M32; 96 fichas; 480 horas, 168 de teoría y 312 de práctica; 20 referencias con D01–D18 preservados; 8 guías ampliadas; navegación por índices, teoría, prácticas y revisión; búsqueda de varias palabras; presentación; persistencia local; exportación/importación Unicode; ausencia de bucles entre pestañas; conservación del punto de continuación local; notas tratadas como texto; CSP y ausencia de solicitudes externas de la aplicación durante las pruebas.
+Identidad y carga del catálogo; coincidencia de activos y ZIP; manifiesto SHA-256; cabeceras; navegación por índices, teoría, prácticas y revisión; búsqueda de varias palabras; presentación; persistencia local; exportación/importación Unicode; ausencia de bucles entre pestañas; conservación del punto de continuación local; notas tratadas como texto; CSP y ausencia de solicitudes externas de la aplicación durante las pruebas de navegador.
 
-El validador `check_release.py` contrasta activos, manifiesto SHA-256, cabeceras y contenido exacto del ZIP frente al directorio de salida. Rechaza archivos modificados, activos ausentes y rutas incoherentes. No valida por sí solo la configuración que se introduzca después en una cuenta Cloudflare.
+`cloudflare.py` verifica una configuración estática explícita, resuelve rutas desde el archivo y nunca construye comandos con shell. Un fallo de build o validación impide llamar a Wrangler. `deploy` y `preview` son acciones remotas explícitas; no se ejecutan durante CI. `dry-run` puede descargar la CLI, pero no publica una versión.
 
 ## Evidencias y artefactos
 
-`campus-diagnostics` conserva logs y capturas incluso si hay fallos. `cloudflare-pages-ready` contiene `pages-ready.zip` únicamente después de superar las pruebas. `campus-web-v2` conserva las fuentes seleccionadas y el sitio validado. Los artefactos tienen retención limitada; conservar el ZIP aceptado antes de que caduquen.
+`campus-diagnostics` conserva logs y capturas incluso si hay fallos. `cloudflare-pages-ready` contiene `pages-ready.zip` únicamente después de superar las pruebas del campus. `campus-web-v2` conserva las fuentes seleccionadas y el sitio validado. El workflow independiente de Cloudflare conserva `cloudflare-static-diagnostics`. Los artefactos tienen retención limitada; conservar el ZIP aceptado antes de que caduquen.
 
-`build-info.json` contiene la versión, cifras del catálogo, hash del catálogo y `sourceCommit` si Actions o Cloudflare proporcionan un SHA válido. En un evento pull_request ese SHA puede ser el merge de prueba; no debe confundirse con el head del PR o el merge definitivo. En local se registra null si no se proporciona el contexto, en lugar de inventarlo.
+`build-info.json` incluye versión, cifras, hash del catálogo y `sourceCommit` cuando puede determinarse. En pull_request puede identificar el merge de prueba: no confundirlo con el head del PR o el merge definitivo. En una copia local modificada o sin Git se utiliza null en lugar de atribuirle un commit limpio. Un manifiesto no demuestra autoría ni seguridad integral.
+
+## Historial de aceptación 2.1
+
+El commit `d03f94062ed7ce887fe1ca0f7badb950c0eb84a2` superó [35089428413](https://github.com/WiktorNykiel/fundamentos-ciberseguridad/actions/runs/35089428413). La revisión final `1388d1d619eef51b8f09bd277789f2a544d04ce2` añadió persistencia de la ruta propia en sessionStorage y superó [35090478719](https://github.com/WiktorNykiel/fundamentos-ciberseguridad/actions/runs/35090478719): 26 Python, 31 JavaScript y 31 Chromium. Su merge en main `ffb73a3cb659c34d9881396c7706df99fe2b1881` superó [35091157812](https://github.com/WiktorNykiel/fundamentos-ciberseguridad/actions/runs/35091157812). Estas ejecuciones históricas no certifican cambios posteriores.
 
 ## Aplicación Next.js independiente
 
-El workflow `Legacy app - dependency acceptance` comprueba npm ci, lint, tipos, compatibilidad y build. Ejecuta auditoría de producción y auditoría completa aunque una comprobación anterior falle, siempre que la instalación haya terminado correctamente. Los informes de auditoría se conservan como artefactos. Una auditoría sin hallazgos es el resultado de esa ejecución, no garantía de ausencia de vulnerabilidades.
-
-Durante la revisión se detectó y corrigió una prueba que resolvía `@humanfs/node` con condiciones CommonJS pese a ser ESM-only. La corrección utiliza el export público de importación declarado por el paquete y conserva la prueba de lectura JSON, sin suprimirla ni asumir que todas las dependencias están elevadas al primer nivel de node_modules.
+Su workflow comprueba npm ci, lint, tipos, compatibilidad y build. Ejecuta auditoría de producción y completa aunque una comprobación anterior falle, siempre que la instalación haya terminado correctamente. La edición 2.2 no cambia esa aplicación ni sus dependencias; no se incorpora Next.js al campus. Una auditoría sin hallazgos es el resultado de una ejecución, no una garantía permanente.
 
 ## Límites
 
-No se ha desplegado automáticamente en Cloudflare, asignado dominio ni publicado una terminal remota. El asistente es una guía manual; el progreso es autodeclarado y vive en localStorage, sin sincronización entre dispositivos ni cifrado de notas. No se afirma haber ejecutado las 96 prácticas nativas, Docker/Swarm, modelos de IA o una cohorte docente.
+No se ha desplegado automáticamente en Cloudflare, asignado dominio ni publicado una terminal remota. El asistente es una guía manual; el progreso es autodeclarado y local, sin sincronización entre dispositivos ni cifrado de notas. No se afirma haber ejecutado los 96 laboratorios nativos, Docker/Swarm, modelos de IA o una cohorte docente.
 
-La compilación local y las pruebas unitarias se ejecutaron también en el entorno de edición. Su navegador bloqueó la navegación local por política; no se alteró esa política. La aceptación visual se realiza en el runner de GitHub Actions y se conserva con sus capturas y logs.
+El navegador del entorno de edición bloqueó la navegación local por política; no se alteró esa política. La aceptación visual se ejecuta en GitHub Actions y se conserva con capturas y logs. La aceptación del runtime local de Workers no sustituye la verificación de la URL tras el despliegue real.

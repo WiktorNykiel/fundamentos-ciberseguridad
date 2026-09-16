@@ -222,14 +222,14 @@ def collect(course: Path = COURSE) -> dict:
     paths = [course/name for name in PUBLIC_DOCS if (course/name).is_file()]
     paths += sorted((course/'lecciones').glob('[0-9]*.md'))
     # Append so existing public D01–D18 deep links retain their meaning.
-    paths += [course/name for name in ['PLAN-DOCENTE.md','COMO-ESTUDIAR.md'] if (course/name).is_file()]
+    paths += [course/name for name in ['PLAN-DOCENTE.md','COMO-ESTUDIAR.md','DESPLIEGUE-ESTATICO.md'] if (course/name).is_file()]
     for index, path in enumerate(paths):
         raw = read_text(path); source = path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else path.name
         resources.append({'id': 'D'+str(index+1).zfill(2), 'title':raw.splitlines()[0].lstrip('# '),
                           'kind':'Lección ampliada' if path.parent.name == 'lecciones' else 'Referencia',
                           'source':REPO+'/blob/main/'+quote(source,safe='/'), **markdown(raw, source, 'D'+str(index+1))})
     blocks = [{'id':b[0], 'title':b[1], 'description':b[4], 'hours':sum(m['hours'] for m in modules if m['block']==b[0])} for b in BLOCKS]
-    result = {'id':'fundamentos-ciberseguridad', 'version':'2.1.0', 'repository':REPO, 'modules':modules,
+    result = {'id':'fundamentos-ciberseguridad', 'version':'2.2.0', 'repository':REPO, 'modules':modules,
               'blocks':blocks, 'resources':resources, 'hours':sum(m['hours'] for m in modules)}
     if result['hours'] != 480 or sum(m['theoryHours'] for m in modules)!=168: raise ValueError('Carga incoherente.')
     route_content(result)
@@ -267,10 +267,12 @@ def build() -> dict:
     stage = Path(tempfile.mkdtemp(prefix='.campus-build-', dir=HERE))
     try:
         (stage/'assets').mkdir()
-        for name in ['app.js','state.js','navigation.js','styles.css']:
+        for name in ['app.js','state.js','navigation.js','catalog.js','styles.css','catalog.css']:
             shutil.copyfile(HERE/'assets'/name, stage/'assets'/name)
         page = read_text(HERE/'index.html')
         (stage/'index.html').write_text(page,encoding='utf-8')
+        (stage/'404.html').write_text('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>No encontrado · Campus</title><link rel="stylesheet" href="/assets/styles.css"></head><body class="print-reader"><main><h1>No se encontró ese archivo.</h1><p>Las secciones del campus se navegan desde el índice.</p><a href="/#/temario">Abrir el temario completo</a></main></body></html>',encoding='utf-8')
+        (stage/'.assetsignore').write_text('.campus-generated\n',encoding='utf-8')
         (stage/'course.json').write_text(json.dumps(data,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
         (stage/'_headers').write_text('/*\n  Content-Security-Policy: '+CSP+'\n  X-Content-Type-Options: nosniff\n  X-Frame-Options: DENY\n  Referrer-Policy: no-referrer\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n  Cache-Control: no-cache\n',encoding='utf-8')
         (stage/'robots.txt').write_text('User-agent: *\nAllow: /\n',encoding='utf-8')
@@ -302,6 +304,14 @@ def build() -> dict:
             'guidedLabs':sum('guide' in lab for m in data['modules'] for lab in m['labs']), 'hours':data['hours']}
     report['version']=data['version']
     commit=os.environ.get('CF_PAGES_COMMIT_SHA') or os.environ.get('GITHUB_SHA','')
+    if not commit:
+        # Git is optional locally; never invent a commit when no checkout exists.
+        import subprocess
+        try:
+            subprocess.run(['git','diff','--quiet','HEAD'],cwd=ROOT,check=True,capture_output=True,timeout=5)
+            commit=subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,check=True,capture_output=True,text=True,timeout=5).stdout.strip()
+        except (OSError,subprocess.SubprocessError):
+            commit=''
     report['sourceCommit']=commit if re.fullmatch(r'[0-9a-f]{40}',commit) else None
     report['courseSha256']=hashlib.sha256((out/'course.json').read_bytes()).hexdigest()
     (out/'build-info.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')

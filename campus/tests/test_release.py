@@ -19,7 +19,7 @@ class ReleaseTests(unittest.TestCase):
         data=build.collect()
         self.assertEqual(data['resources'][0]['id'],'D01')
         self.assertIn('Laboratorio',data['resources'][0]['title'])
-        self.assertEqual(data['resources'][-1]['title'],'Cómo estudiar: teoría, práctica y evidencia')
+        self.assertEqual(data['resources'][19]['title'],'Cómo estudiar: teoría, práctica y evidencia')
     def test_tampered_bundle_rejected(self):
         with tempfile.TemporaryDirectory() as t:
             target=Path(t)/'dist';shutil.copytree(build.HERE/'dist',target)
