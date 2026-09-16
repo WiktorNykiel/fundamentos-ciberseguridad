@@ -1,0 +1,44 @@
+name: Editorial English catalogue preparation
+on:
+  push:
+    branches: [feat/bilingual-campus-handoff]
+    paths: [campus/translations.py, campus/tools/translate-editorial.mjs, .github/workflows/editorial-translation.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: editorial-translation-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  translate:
+    if: github.ref == 'refs/heads/feat/bilingual-campus-handoff'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Extract only public course prose
+        run: python3 campus/translations.py /tmp/editorial-input.json
+      - name: Install isolated editorial translator
+        run: |
+          mkdir -p /tmp/editorial-translator
+          cd /tmp/editorial-translator
+          npm init -y
+          npm install --no-audit --no-fund @huggingface/transformers@3.8.1
+          cp "$GITHUB_WORKSPACE/campus/tools/translate-editorial.mjs" ./translate.mjs
+      - name: Translate locally on the runner using pinned ONNX weights
+        run: node /tmp/editorial-translator/translate.mjs /tmp/editorial-input.json /tmp/editorial-output/en-content.json
+      - name: Retain translation for review; no automatic publication
+        uses: actions/upload-artifact@v4
+        with:
+          name: editorial-english-catalogue
+          path: /tmp/editorial-output/en-content.json
+          retention-days: 7
+          if-no-files-found: error
