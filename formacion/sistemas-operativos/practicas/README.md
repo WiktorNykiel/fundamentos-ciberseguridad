@@ -15,4 +15,6 @@ Estos ocho guiones concretan actividades del catálogo de 96 laboratorios; **no 
 
 Reparto ordinario: 20 minutos de preparación, 70 de práctica guiada, 40 de variante, 30 de evidencia y 20 de defensa/recuperación: 180 minutos. R08 utiliza 30/90/50/40/30: 240 minutos. Preparar datos y probar no significa haber impartido o validado los 96 laboratorios.
 
-Entrega común: ficha de entorno, órdenes explicadas, resultados, caso negativo, límite y recuperación. Datos y actores ficticios. Las soluciones de referencia están visibles al titular del repositorio privado; antes de dar acceso a alumnos, separar soluciones mediante permisos reales o repositorio distinto.
+Entrega común: ficha de entorno, órdenes explicadas, resultados, caso negativo, límite y recuperación. Datos y actores ficticios. El repositorio es público: las soluciones y respuestas incluidas son referencias de aprendizaje, no material reservado. Los expedientes y exámenes no públicos necesitan un almacenamiento separado y permisos reales.
+
+[Volver al temario](../README.md) · [Cómo estudiar](../COMO-ESTUDIAR.md) · [Campus y asistente](../../../campus/README.md) · [Consolidación: desplegar el campus](../DESPLIEGUE-ESTATICO.md).

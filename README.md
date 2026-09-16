@@ -1,8 +1,21 @@
 # Fundamentos de ciberseguridad
 
-**Wiktor Nykiel · Campus 2.1 · Linux, Windows y macOS · Interfaz clara**
+**Wiktor Nykiel · Campus 2.2 · Linux, Windows y macOS · Interfaz clara**
 
 Aprende a comprender, administrar, automatizar, proteger e investigar sistemas. El curso combina teoría, terminal, prácticas guiadas y evidencias. Los materiales son públicos; las horas describen planificación, no una acreditación automática.
+
+## Publicar sin confundir las aplicaciones
+
+Los logs recibidos corresponden a **Workers Builds**, que había autodetectado la aplicación Next.js de referencia. Para el Worker existente, configura raíz del repositorio, build command vacío, deploy `python3 campus/cloudflare.py deploy` y preview `python3 campus/cloudflare.py preview`; añade `SKIP_DEPENDENCY_INSTALL=1` y `PYTHON_VERSION=3.13`. El wrapper compila, valida y usa la configuración estática explícita. No necesita OpenNext ni un servicio `frontend`.
+
+Para **Pages**, se mantiene la ruta independiente con raíz `campus`, build `python3 build.py && python3 check_release.py` y salida `dist`. [Configuración completa y diagnóstico](campus/DEPLOY-CLOUDFLARE.md).
+
+```sh
+python3 campus/cloudflare.py plan
+python3 campus/cloudflare.py build
+```
+
+Estos comandos preparan y verifican sin publicar. `dry-run` prueba Wrangler sin upload; `deploy` publica producción y `preview` sube una versión de prueba. No son sinónimos.
 
 ## Entradas principales
 
@@ -27,6 +40,8 @@ Aprende a comprender, administrar, automatizar, proteger e investigar sistemas. 
 | [IA desde terminal](formacion/sistemas-operativos/modulos/06-ia.md) | M31 | 20 |
 | [Proyecto integrador](formacion/sistemas-operativos/CAPSTONE.md) | M32 | 40 |
 | **Total: 168 de teoría y 312 de práctica** | **32 módulos / 96 diseños de laboratorio** | **480** |
+
+El índice permite filtrar por bloque, texto y avance sin duplicar el catálogo. La biblioteca añade una lección de despliegue verificable (D21), conservando D01–D20.
 
 El campus genera lectura, presentación y asistente desde las mismas fuentes. Incluye índice de los 32 módulos, prerrequisitos, búsqueda por varias palabras en módulos y biblioteca, autoevaluaciones, notas y progreso local exportable. Las ocho guías R01–R08 amplían parte de los 96 diseños; no equivalen a 96 ejecuciones validadas.
 

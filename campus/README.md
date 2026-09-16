@@ -1,10 +1,14 @@
 # Campus web · Fundamentos de ciberseguridad
 
-**Wiktor Nykiel · Versión 2.1.0 · Español · Interfaz clara**
+**Wiktor Nykiel · Versión 2.2.0 · Español · Interfaz clara.**
 
-Campus estático generado desde el temario del repositorio: 32 módulos, 480 horas planificadas, 96 fichas, 32 apuntes y 32 autoevaluaciones públicas. Incluye las ocho guías R01–R08 y una biblioteca de 20 recursos. El contenido diseñado no se presenta como práctica nativa ejecutada.
+Campus estático generado desde el temario del repositorio: 32 módulos, 480 horas planificadas, 96 fichas, 32 apuntes y 32 autoevaluaciones públicas. Incluye las ocho guías R01–R08 y una biblioteca de 21 recursos. El contenido diseñado no se presenta como práctica nativa ejecutada.
 
-[Desplegar en Pages](DEPLOY-CLOUDFLARE.md) · [Editar el curso](EDICION.md) · [Cómo estudiar](../formacion/sistemas-operativos/COMO-ESTUDIAR.md) · [Pruebas](QA.md)
+[Desplegar en Cloudflare](DEPLOY-CLOUDFLARE.md) · [Editar el curso](EDICION.md) · [Cómo estudiar](../formacion/sistemas-operativos/COMO-ESTUDIAR.md) · [Pruebas](QA.md)
+
+## Workers y Pages: dos rutas, una salida
+
+`wrangler.jsonc` de la raíz declara los activos de `campus/dist` para Workers, sin backend ni bindings a servicios. `python3 campus/cloudflare.py build` compila y comprueba sin red; `dry-run` valida Wrangler sin publicar; `deploy` y `preview` son acciones remotas explícitas. La [guía](DEPLOY-CLOUDFLARE.md) separa los ajustes del Worker existente de los de Pages y explica los dos errores observados en los logs. No se copian los logs originales al repositorio público.
 
 ## Navegación para aprender
 
@@ -20,6 +24,8 @@ Campus estático generado desde el temario del repositorio: 32 módulos, 480 hor
 | `#/modulo/M05/practicas` | Prácticas del módulo |
 | `#/modulo/M05/revision` | Autoevaluación formativa |
 | `#/modulo/M05/practica/L05A` | Asistente de cinco fases |
+
+El índice completo dispone de filtros de bloque, texto y avance con contador accesible y reinicio. Los filtros no cambian notas ni progreso. D21 incorpora una actividad de consolidación sobre despliegue estático, sin añadir horas al programa.
 
 La búsqueda por varias palabras ignora mayúsculas y tildes y consulta módulos y documentos. Los prerrequisitos orientan sin bloquear. Los enlaces antiguos D01–D18 conservan su significado; D19 y D20 incorporan plan docente y guía de estudio.
 
@@ -62,7 +68,7 @@ python3 campus/build.py
 python3 campus/check_release.py
 python3 -m pip install playwright==1.55.0
 python3 -m playwright install chromium
-python3 campus/tests/browser.py
+python3 campus/tests/browser_extra.py
 ```
 
 La dependencia Playwright solo pertenece al entorno de pruebas. CI conserva diagnósticos incluso con fallos y publica el artefacto `cloudflare-pages-ready` únicamente tras superar la aceptación. Consultar el resultado de la ejecución concreta: existir una prueba no significa haberla superado. Las pruebas web no acreditan ejecución de las 96 prácticas nativas.

@@ -1,0 +1,8 @@
+{
+  "name": "fundamentos-ciberseguridad",
+  "compatibility_date": "2026-09-16",
+  "assets": {
+    "directory": "./campus/dist",
+    "not_found_handling": "404-page"
+  }
+}
