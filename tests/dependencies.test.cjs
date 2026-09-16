@@ -19,12 +19,12 @@ function installed(name) {
     const pkg = JSON.parse(fs.readFileSync(manifest, 'utf8'));
     if (pkg.name !== name) continue;
     const resolver = createRequire(manifest);
-    return {pkg, entry: resolver.resolve(name)};
+    return {pkg, dir, resolveCommonJS: () => resolver.resolve(name)};
   }
   throw new Error(`Required compatibility target is not installed: ${name}`);
 }
 const pkg = name => installed(name).pkg;
-const load = name => require(installed(name).entry);
+const load = name => require(installed(name).resolveCommonJS());
 function atLeast(actual, minimum) {
   assert.match(actual, /^\d+\.\d+\.\d+$/, 'Expected a stable semantic version');
   const a=actual.split('.').map(Number), b=minimum.split('.').map(Number);
@@ -71,7 +71,16 @@ test('baseline mapping exposes version data', () => {
   const mapping=load('baseline-browser-mapping');assert.equal(typeof mapping.getAllVersions,'function');assert.ok(mapping.getAllVersions());
 });
 test('humanfs reads JSON using its installed location', async () => {
-  const {hfs}=await import(pathToFileURL(installed('@humanfs/node').entry).href);
+  // humanfs is ESM-only. Use its declared public import entry, not CJS conditions.
+  const info=installed('@humanfs/node');
+  const rootExport=info.pkg.exports['.'] ?? info.pkg.exports;
+  const entry=typeof rootExport==='string' ? rootExport
+    : typeof rootExport.import==='string' ? rootExport.import : rootExport.import?.default;
+  assert.equal(typeof entry,'string','Expected the public humanfs import export');
+  assert.ok(entry.startsWith('./'),'Public import must be package-relative');
+  const target=path.resolve(info.dir,entry);
+  assert.ok(target.startsWith(info.dir+path.sep),'Import must stay inside the package');
+  const {hfs}=await import(pathToFileURL(target).href);
   const config=await hfs.json(path.join(root,'package.json'));
   assert.deepEqual(config.dependencies,JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8')).dependencies);
 });
