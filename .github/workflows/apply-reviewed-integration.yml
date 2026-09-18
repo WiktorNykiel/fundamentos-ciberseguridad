@@ -1,0 +1,29 @@
+name: Verify reviewed integration
+on:
+  push:
+    branches: [maintenance/rutas-dpd-integracion-20260918]
+    paths: [.github/workflows/apply-reviewed-integration.yml]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Export only staged source payload for byte comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/payload-review"
+          cp .review/integration-*.b64 "$RUNNER_TEMP/payload-review/"
+          cd "$RUNNER_TEMP/payload-review"
+          sha256sum integration-*.b64 > SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: reviewed-integration-transport
+          path: ${{ runner.temp }}/payload-review/
+          retention-days: 1
+          if-no-files-found: error
