@@ -4,6 +4,12 @@
 
 Aprende a comprender, administrar, automatizar, proteger e investigar sistemas. El curso combina teoría, terminal, prácticas guiadas y evidencias. Los materiales son públicos; las horas describen planificación, no una acreditación automática.
 
+## Ampliación curricular y próxima entrega
+
+El [plan maestro](formacion/plan-maestro/README.md) estructura **18 áreas y 108 unidades propuestas**, desde introducción a la informática hasta cloud, contenedores, gobierno, riesgos, AppSec, Blue Team, CTI y resiliencia. Añade diseños de laboratorio, correspondencias parciales CSF–RGPD–ISO–ENS, un caso numérico de riesgo y un glosario de 110 entradas ES/EN.
+
+Es una **referencia de desarrollo**, no un nuevo catálogo activo ni horas adicionales ya impartidas. Conserva los 32 módulos, 96 fichas y 480 horas actuales. Las instrucciones para continuar, el bilingüismo completo, la accesibilidad móvil y el traspaso seguro de progreso están en [Continuación](formacion/plan-maestro/08-continuacion.md). Hay un [resumen en inglés](formacion/plan-maestro/OVERVIEW.en.md); no se presenta como traducción integral del curso.
+
 ## Publicar sin confundir las aplicaciones
 
 Los logs recibidos corresponden a **Workers Builds**, que había autodetectado la aplicación Next.js de referencia. Para el Worker existente, configura raíz del repositorio, build command vacío, deploy `python3 campus/cloudflare.py deploy` y preview `python3 campus/cloudflare.py preview`; añade `SKIP_DEPENDENCY_INSTALL=1` y `PYTHON_VERSION=3.13`. El wrapper compila, valida y usa la configuración estática explícita. No necesita OpenNext ni un servicio `frontend`.
@@ -24,6 +30,7 @@ Estos comandos preparan y verifican sin publicar. `dry-run` prueba Wrangler sin 
 | Probar la web en Cloudflare | [Despliegue paso a paso](campus/DEPLOY-CLOUDFLARE.md) |
 | Comprender cómo estudiar | [Guía de estudio](formacion/sistemas-operativos/COMO-ESTUDIAR.md) |
 | Consultar el temario | [Índice del programa](formacion/sistemas-operativos/README.md) |
+| Ampliar informática, arquitectura y ciberseguridad | [Plan maestro y referencia de continuidad](formacion/plan-maestro/README.md) |
 | Modificar contenido sin duplicarlo | [Guía de edición](campus/EDICION.md) |
 | Revisar pruebas y límites | [Aceptación del campus](campus/QA.md) |
 | Operar el laboratorio | [Entorno y aislamiento](formacion/sistemas-operativos/LABORATORIO.md) |
@@ -62,9 +69,10 @@ Abrir `http://127.0.0.1:8788`. Usar Python 3.11 o posterior. El campus no necesi
 ```text
 campus/                         Web estática, compilador, pruebas y guía de Pages
 formacion/sistemas-operativos/   Temario, lecciones, prácticas, kit y evaluación
+formacion/plan-maestro/          Ampliación curricular y referencia para continuar
 src/                            Aplicación Next.js de referencia, independiente
 scripts/                        Comprobaciones de integración e historial
-.github/workflows/              Validación del campus y aplicación de referencia
+.github/workflows/              Validación del campus, referencias y aplicación
 ```
 
 La aplicación Next.js anterior se conserva. Su uso y alcance están en [Aplicación de referencia](docs/legacy-app.md). No seleccionar el preset Next.js al desplegar el campus.
