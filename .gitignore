@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Generated independent learning catalogue
+awesome-dpd/site/
+
+# Python bytecode is never source
+__pycache__/
+*.py[cod]

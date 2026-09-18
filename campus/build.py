@@ -14,6 +14,7 @@ from content import notes_and_quizzes
 from bilingual import collect_en
 from provenance import source_commit
 from release_inputs import public_kit_files
+from learning_paths import render as render_learning_paths
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -303,6 +304,7 @@ def build() -> dict:
             for path in public_kit_files(COURSE/'kit'):
                 info=zipfile.ZipInfo('kit/'+path.name,(2026,9,14,0,0,0)); info.compress_type=zipfile.ZIP_DEFLATED
                 archive.writestr(info, path.read_bytes())
+        route_report = render_learning_paths(stage, data)
         (stage/'.campus-generated').write_text('campus-v2\n')
         if out.exists(): shutil.rmtree(out)
         stage.rename(out)
@@ -312,6 +314,7 @@ def build() -> dict:
     report={'modules':len(data['modules']),'labs':sum(len(m['labs']) for m in data['modules']),
             'resources':len(data['resources']),'slides':sum(len(m['slides']) for m in data['modules']),
             'guidedLabs':sum('guide' in lab for m in data['modules'] for lab in m['labs']), 'hours':data['hours']}
+    report['learningPaths']=route_report
     report['languages']=['es','en']
     report['englishModules']=len(english['modules'])
     report['englishLabs']=sum(len(m['labs']) for m in english['modules'])
