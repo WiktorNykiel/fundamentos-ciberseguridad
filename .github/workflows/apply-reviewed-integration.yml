@@ -4,26 +4,65 @@ on:
     branches: [maintenance/rutas-dpd-integracion-20260918]
     paths: [.github/workflows/apply-reviewed-integration.yml]
 permissions:
-  contents: read
+  contents: write
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          persist-credentials: false
-      - name: Export only staged source payload for byte comparison
+          fetch-depth: 0
+      - name: Restore exact reviewed patch and enforce its digest
         shell: bash
         run: |
           set -euo pipefail
-          mkdir "$RUNNER_TEMP/payload-review"
-          cp .review/integration-*.b64 "$RUNNER_TEMP/payload-review/"
-          cd "$RUNNER_TEMP/payload-review"
-          sha256sum integration-*.b64 > SHA256SUMS
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: reviewed-integration-transport
-          path: ${{ runner.temp }}/payload-review/
-          retention-days: 1
-          if-no-files-found: error
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, gzip, hashlib, json, os
+          fixes = json.loads(Path('.review/transport-fixes.json').read_text())
+          parts = []
+          for i in range(1, 5):
+              name = f'integration-{i}.b64'
+              value = Path('.review', name).read_text()
+              fix = fixes[name]
+              assert hashlib.sha256(value.encode()).hexdigest() == fix['before'], name
+              for start, end, replacement in reversed(fix['edits']):
+                  value = value[:start] + replacement + value[end:]
+              assert hashlib.sha256(value.encode()).hexdigest() == fix['after'], name
+              parts.append(value.strip())
+          patch = gzip.decompress(base64.b64decode(''.join(parts), validate=True))
+          assert hashlib.sha256(patch).hexdigest() == '7442d1b0a770b6057004c6de8e34b2606c570942d00fb275df6680cf108b4caf'
+          Path(os.environ['RUNNER_TEMP'], 'integration.patch').write_bytes(patch)
+          PY
+          git apply --check "$RUNNER_TEMP/integration.patch"
+          git apply --index "$RUNNER_TEMP/integration.patch"
+          git rm .review/integration-*.b64 .review/transport-fixes.json .github/workflows/apply-reviewed-integration.yml
+          test "$(git write-tree)" = f45f5bc39d7eb7bb4ff5b42ff72cc90dae12968d
+          git diff --cached --check
+      - name: Reproduce content and unit acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s campus/tests -p 'test_*.py'
+          node --test campus/tests/*.test.mjs
+          python3 awesome-dpd/tools/validate.py
+          python3 -m unittest discover -s awesome-dpd/tests
+          python3 campus/build.py
+          python3 campus/check_release.py
+      - name: Integrate history on review branch only, never main
+        shell: bash
+        env:
+          REVIEW_BRANCH: maintenance/rutas-dpd-integracion-20260918
+          OLD_HEAD: e427343c5bbd09751d3aacd2e6c6ad2c006d6e34
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/$REVIEW_BRANCH"
+          test "$(git write-tree)" = f45f5bc39d7eb7bb4ff5b42ff72cc90dae12968d
+          test "$(git ls-remote origin "refs/heads/$REVIEW_BRANCH" | cut -f1)" = "$GITHUB_SHA"
+          git cat-file -e "$OLD_HEAD^{commit}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          COMMIT=$(printf '%s\n\n%s\n' 'feat: integrate six learning paths and reviewed awesome-dpd collection' 'Preserve superseded bilingual branch ancestry without reverting newer main; exact tested tree verified.' | git commit-tree f45f5bc39d7eb7bb4ff5b42ff72cc90dae12968d -p "$GITHUB_SHA" -p "$OLD_HEAD")
+          git push origin "$COMMIT:refs/heads/$REVIEW_BRANCH"
+          printf 'Integrated commit: `%s`\n\nPatch SHA-256: `7442d1b0a770b6057004c6de8e34b2606c570942d00fb275df6680cf108b4caf`\n\nTree: `f45f5bc39d7eb7bb4ff5b42ff72cc90dae12968d`\n' "$COMMIT" >> "$GITHUB_STEP_SUMMARY"
