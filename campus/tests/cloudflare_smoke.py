@@ -24,8 +24,11 @@ with urlopen(BASE+'/course.json',timeout=5) as r:
     assert data['id']=='fundamentos-ciberseguridad'
     assert len(data['modules'])==32 and data['hours']==480
     assert len(data['resources'])==21
+with urlopen(BASE+'/course.en.json',timeout=5) as r:
+    english=json.load(r);assert english['language']=='en'
+    assert len(english['modules'])==32 and sum(len(m['labs']) for m in english['modules'])==96
 with urlopen(BASE+'/build-info.json',timeout=5) as r:
-    info=json.load(r);assert info['version']=='2.2.0'
+    info=json.load(r);assert info['version']=='2.3.0'
     root=Path(__file__).resolve().parents[2]
     expected=subprocess.run(['git','rev-parse','HEAD'],cwd=root,check=True,capture_output=True,text=True,timeout=5).stdout.strip()
     assert info['sourceCommit']==expected, 'The runtime must serve the actual clean checkout commit.'
@@ -36,4 +39,4 @@ try:
     raise AssertionError('Una ruta inexistente no debe devolver éxito HTML.')
 except HTTPError as e:
     assert e.code==404
-print(json.dumps({'status':'passed','runtime':'wrangler-local','checks':5,'sourceCommit':info['sourceCommit'],'remoteDeployment':False}))
+print(json.dumps({'status':'passed','runtime':'wrangler-local','checks':6,'sourceCommit':info['sourceCommit'],'remoteDeployment':False}))
