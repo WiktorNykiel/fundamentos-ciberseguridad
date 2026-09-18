@@ -1,38 +1,28 @@
-# Edición y evolución del campus
+# Content authoring / Edición del campus ES/EN
 
-## Dónde cambiar cada contenido
+## Canonical identifiers
 
-| Elemento | Fuente |
-|---|---|
-| Títulos, orden y prerrequisitos | `formacion/sistemas-operativos/planificacion/curriculo.json` |
-| Unidades, herramientas y fichas de práctica | `formacion/sistemas-operativos/modulos/*.md` y `CAPSTONE.md` |
-| Apuntes explicativos y autoevaluación | `campus/content.py` |
-| Guías detalladas existentes | `formacion/sistemas-operativos/practicas/R*.md` |
-| Biblioteca | Lista `PUBLIC_DOCS` de `build.py` y lecciones numeradas |
-| Vista, presentación y asistente | `campus/assets/app.js` |
-| Progreso y validación de importaciones | `campus/assets/state.js` |
-| Diseño claro, responsive e impresión | `campus/assets/styles.css` |
+Keep M01–M32, L01A–L32C, references D01–D21 and the existing progress v1 key stable. New content must not silently reorder milestones or change what a saved ID means. `build.py` builds Spanish from `formacion/sistemas-operativos/`; `bilingual.py` reads the English teaching edition in `campus/locales/en/` and checks parity.
 
-Editar fuentes, no `dist/course.json` ni el HTML generado. El build valida la estructura y reconstruye lectura, diapositivas, búsqueda y fichas. La aplicación Next.js de la raíz no es una dependencia del campus.
+English inputs: `foundations-linux.md`, `windows-macos.md`, `operations-capstone.md`, `references-core.md`, `references-learning.md`, `guides.md` and `quizzes.tsv`. Module headers use `# M01 · Title`; labs use `**L01A · Title.**` followed by Environment, Tasks, Evidence, Success and Recovery. Keep the paragraph format understood by the compiler. A missing or extra translated module, lab, guide or reference fails the build; do not substitute a different language silently.
 
-## Patrón docente
+Interface strings live in `assets/i18n.js`. Command text and filenames are technical data, not strings to translate by global replacement. Every new interface key requires its ES/EN entries and a regression test. Keep generated `dist`, ZIPs and QA logs out of source commits.
 
-Cada módulo necesita una pregunta de entrada, un modelo mental, una tarea, un resultado verificable, un caso negativo y una explicación de límites. Usar la GUI para localizar el objeto y la CLI para reproducir o contrastar la acción. No introducir comandos sin contexto de plataforma, versión, privilegio y efecto.
+## Calidad docente
 
-Una práctica debe identificar entorno, tareas, evidencia, criterio de éxito y recuperación. Mantener IDs estables: `M01` a `M32` y `L01A` a `L32C`. El cambio de una ficha no añade horas automáticamente. Si cambia el número de módulos o las reglas de dominio, hay que actualizar catálogo, compilador, interfaz, tests y esquema de progreso de forma coordinada.
+Cada unidad explica una pregunta, resultado, prerrequisitos, mecanismo, ejemplo, tarea GUI/CLI cuando corresponda, evidencia esperada, prueba negativa, recuperación y límites. La versión inglesa debe mantener significado y dificultad, no limitarse a cambiar encabezados. Las comprobaciones automáticas de IDs y longitud no sustituyen revisión lingüística/técnica.
 
-Las guías ampliadas son profundizaciones de fichas existentes. No decir que las 96 prácticas están ejecutadas porque existan 96 asistentes. Diferenciar diseño, explicación, prueba del código y validación nativa de un sistema.
+Las referencias enlazadas y las preguntas formativas son públicas. No se deben introducir soluciones reservadas, expedientes, credenciales, logs reales ni datos personales de alumnos. El plan maestro documenta ampliaciones pendientes y no debe aumentar automáticamente las 480 horas o cambiar la finalización de un alumno.
 
-## Revisar una contribución
+## Acceptance commands
 
-Revisar diff, procedencia de referencias, datos sensibles, navegación y consecuencias de las acciones propuestas. Ejecutar unitarias, build real y pruebas de navegador. Comprobar portada, un módulo de cada plataforma, presentación, asistente, teclado y móvil. Los logs de CI deben corresponder al commit revisado.
+```sh
+python3 campus/build.py
+python3 -m unittest discover -s campus/tests -p 'test_*.py' -v
+node --test campus/tests/*.test.mjs
+python3 campus/build.py
+python3 campus/check_release.py
+python3 campus/tests/browser_bilingual.py
+```
 
-Las autoevaluaciones son ejercicios formativos abiertos. Mantener fuera del repositorio público exámenes reservados, expedientes, respuestas individuales y cualquier información de alumnos. La exclusión de un documento del build no borra versiones públicas anteriores de Git.
-
-## Ampliaciones previstas, no implementadas
-
-Sincronización autenticada entre dispositivos; panel docente; evaluación supervisada; backend de IA; ejecución de laboratorios en entornos aislados; telemetría autorizada de resultados; y evaluación nativa de scripts Windows/macOS. Cada ampliación necesita diseño de acceso, retención, límites, coste y pruebas; no es una función disponible por aparecer en esta lista.
-
-## Criterio de release
-
-Un release del campus incluye commit de origen, informe de build, pruebas de aceptación, capturas revisadas y manifiesto SHA-256 del sitio. El despliegue real exige además URL de proveedor y verificación de esa URL. Una versión del campus no es una certificación de la formación ni una prueba de haber impartido sus horas.
+For WebKit, install its Playwright engine and repeat with `CAMPUS_BROWSER=webkit`. Do not count an unavailable browser as passed. Review both languages, small screens, the real source commit and actual release artifact. [QA.md](QA.md) describes the scopes.

@@ -1,35 +1,27 @@
-# Aceptación del campus y preparación de Cloudflare
+# Acceptance scope / Alcance de aceptación · 2.3
 
-## Edición 2.2: alcance de las nuevas comprobaciones
+## Distinct layers
 
-Se añaden 13 contratos offline del wrapper de despliegue y conservación de rutas D01–D20, y ocho pruebas de filtros del índice. Las 31 pruebas de navegador existentes se amplían con seis casos: filtrado por bloque, texto y progreso, estado vacío/reinicio, nueva lección D21, filtros en móvil y salto a un bloque oculto por filtros previos.
+1. **Python unit tests:** compiler, translation parity, local delivery, release manifest, provenance and design-token calculations.
+2. **JavaScript unit/model tests:** validation, state/navigation, explicit interface translations, AES-GCM snapshots and merge behavior. `app-model.test.mjs` uses a minimal in-memory DOM adapter: it is not browser rendering.
+3. **Browser acceptance:** `browser_bilingual.py` runs actual Playwright Chromium and WebKit. Twenty test methods include repeated checks across languages, 32 modules/three views, all references and multiple viewport sizes. Counts of test methods and internal scenarios must not be conflated.
+4. **Existing regression suites:** the kit and curriculum planning remain separate.
+5. **Cloudflare local acceptance:** the dedicated workflow builds the static release, checks Wrangler configuration/dry-run and serves through a local runtime. It does not publish to an account.
 
-El workflow `Cloudflare - static deployment acceptance` usa Wrangler 4.132.0 con `--dry-run` y runtime `--local`, sin credenciales Cloudflare ni cambios remotos. Comprueba contenido, MIME, CSP y HTTP 404. Los resultados se consultan en la ejecución concreta; ningún workflow de esta edición publica en una cuenta. Las pruebas unitarias no demuestran que el runtime o navegador se haya ejecutado.
+## Current implementation
 
-El catálogo mantiene M01–M32, 96 fichas, 480 horas (168 teoría/312 práctica), ocho guías ampliadas y 170 secciones de presentación. La biblioteca pasa a 21 referencias sin alterar el significado de D01–D20. El índice permite filtros sin modificar el progreso.
+The latest local preparation passed 82 Python and 89 JavaScript tests. The local managed Chromium environment refused navigation with `ERR_BLOCKED_BY_ADMINISTRATOR`; that result was not bypassed or called a successful browser test. The repository workflow now runs the real bilingual suite for Chromium and WebKit; **consult its completed run for the exact accepted commit and outcome**. The existence of this file is not a test result.
 
-## Qué se comprueba
+Screenshots and logs are retained separately under `campus/qa/`, including failures. The Pages package and source snapshot are uploaded only after the complete campus job succeeds. Generated QA files are ignored and do not invalidate provenance of clean source inputs. A modified/unidentified checkout is reported as `sourceCommit: null`, not assigned an unrelated CI SHA.
 
-Identidad y carga del catálogo; coincidencia de activos y ZIP; manifiesto SHA-256; cabeceras; navegación por índices, teoría, prácticas y revisión; búsqueda de varias palabras; presentación; persistencia local; exportación/importación Unicode; ausencia de bucles entre pestañas; conservación del punto de continuación local; notas tratadas como texto; CSP y ausencia de solicitudes externas de la aplicación durante las pruebas de navegador.
+## Responsive and privacy cases
 
-`cloudflare.py` verifica una configuración estática explícita, resuelve rutas desde el archivo y nunca construye comandos con shell. Un fallo de build o validación impide llamar a Wrangler. `deploy` y `preview` son acciones remotas explícitas; no se ejecutan durante CI. `dry-run` puede descargar la CLI, pero no publica una versión.
+Widths 320, 360, 390, 768, 820, 1024 and 1440 px cover home, index, theory, guided practice, progress and sharing in both languages. Tests check global overflow, mobile menu, language/state continuity, presentation keyboard, no-JavaScript reading, JSON confirmation and a cross-profile progress link. Transfer must require confirmation and exclude notes. Keep raw saved state for recovery when invalid; never silently reset and overwrite it.
 
-## Evidencias y artefactos
+## Limits
 
-`campus-diagnostics` conserva logs y capturas incluso si hay fallos. `cloudflare-pages-ready` contiene `pages-ready.zip` únicamente después de superar las pruebas del campus. `campus-web-v2` conserva las fuentes seleccionadas y el sitio validado. El workflow independiente de Cloudflare conserva `cloudflare-static-diagnostics`. Los artefactos tienen retención limitada; conservar el ZIP aceptado antes de que caduquen.
+This does not certify WCAG conformance, human translation perfection, every physical iPad/Safari configuration, account deployment, OTP login, cloud synchronization or execution of the 96 native labs. Check a physical phone/tablet and the real provider URL before a cohort. Progress is self-reported. No secrets, real learner data or production systems are used by the tests.
 
-`build-info.json` incluye versión, cifras, hash del catálogo y `sourceCommit` cuando puede determinarse. En pull_request puede identificar el merge de prueba: no confundirlo con el head del PR o el merge definitivo. En una copia local modificada o sin Git se utiliza null en lugar de atribuirle un commit limpio. Un manifiesto no demuestra autoría ni seguridad integral.
+## Reproduce
 
-## Historial de aceptación 2.1
-
-El commit `d03f94062ed7ce887fe1ca0f7badb950c0eb84a2` superó [35089428413](https://github.com/WiktorNykiel/fundamentos-ciberseguridad/actions/runs/35089428413). La revisión final `1388d1d619eef51b8f09bd277789f2a544d04ce2` añadió persistencia de la ruta propia en sessionStorage y superó [35090478719](https://github.com/WiktorNykiel/fundamentos-ciberseguridad/actions/runs/35090478719): 26 Python, 31 JavaScript y 31 Chromium. Su merge en main `ffb73a3cb659c34d9881396c7706df99fe2b1881` superó [35091157812](https://github.com/WiktorNykiel/fundamentos-ciberseguridad/actions/runs/35091157812). Estas ejecuciones históricas no certifican cambios posteriores.
-
-## Aplicación Next.js independiente
-
-Su workflow comprueba npm ci, lint, tipos, compatibilidad y build. Ejecuta auditoría de producción y completa aunque una comprobación anterior falle, siempre que la instalación haya terminado correctamente. La edición 2.2 no cambia esa aplicación ni sus dependencias; no se incorpora Next.js al campus. Una auditoría sin hallazgos es el resultado de una ejecución, no una garantía permanente.
-
-## Límites
-
-No se ha desplegado automáticamente en Cloudflare, asignado dominio ni publicado una terminal remota. El asistente es una guía manual; el progreso es autodeclarado y local, sin sincronización entre dispositivos ni cifrado de notas. No se afirma haber ejecutado los 96 laboratorios nativos, Docker/Swarm, modelos de IA o una cohorte docente.
-
-El navegador del entorno de edición bloqueó la navegación local por política; no se alteró esa política. La aceptación visual se ejecuta en GitHub Actions y se conserva con capturas y logs. La aceptación del runtime local de Workers no sustituye la verificación de la URL tras el despliegue real.
+See [EDICION.md](EDICION.md) for commands, [DESIGN.md](DESIGN.md) for design constraints and [DEPLOY-CLOUDFLARE.md](DEPLOY-CLOUDFLARE.md) for provider acceptance. For each release record commit, workflow run, Python/Node/browser versions, outcomes, artifact SHA-256 and unresolved limitations in the PR or release record.

@@ -1,35 +1,52 @@
-# Cloudflare: publicar el campus correcto
+# Cloudflare deployment / Despliegue Cloudflare · Campus ES/EN 2.3
 
-**Campus 2.2 · 16 de septiembre de 2026.** Hay dos productos válidos: **Workers Static Assets** y **Pages**. Ambos publican `campus/dist/`, no la aplicación Next.js de la raíz. Selecciona una ruta y no mezcles sus comandos. Esta guía no acredita un despliegue en ninguna cuenta.
+## Select the correct application / Seleccionar la aplicación correcta
 
-## A. Corregir el Worker de los logs recibidos
+The campus is a static site in `campus/dist`, generated with Python. The Next.js application at the repository root is an independent reference application. **Do not select the Next.js preset or OpenNext for this campus.**
 
-Los registros del 16 de septiembre muestran comandos de **Workers Builds**, no una compilación de Pages. A las 11:03 UTC se ejecutó `npx wrangler deploy` en la raíz, se autodetectó Next.js y se introdujo OpenNext. El fallo final fue un binding `WORKER_SELF_REFERENCE` hacia `frontend`, que no existía. A las 11:28 UTC se ejecutó `npx wrangler versions upload` sin definir un script o directorio de activos. Estos son dos errores distintos; los avisos anteriores de npm no son el fallo final observado.
+Los logs históricos aportados del 16 de septiembre de 2026 mostraban Workers Builds autodetectando Next.js, un binding hacia `frontend` inexistente y otro intento sin entry-point/assets. No demuestran el estado actual de la cuenta. La configuración explícita siguiente evita mezclar aplicaciones, sin crear un Worker `frontend` innecesario ni desactivar controles.
 
-Los logs originales no se copian al repositorio: contienen identificadores de cuenta y rutas del proveedor. La configuración nueva `wrangler.jsonc` declara únicamente nombre, fecha de compatibilidad y activos estáticos. No necesita `WORKER_SELF_REFERENCE`, R2, Images, OpenNext ni `nodejs_compat`.
+## Pages with Git integration / Pages conectado a Git
 
-### Ajustes del Worker existente
-
-En **Workers & Pages → fundamentos-ciberseguridad → Settings → Build**, configura:
-
-| Campo | Valor |
+| Setting / Ajuste | Value / Valor |
 |---|---|
-| Repositorio | `WiktorNykiel/fundamentos-ciberseguridad` |
-| Rama de producción | `main` |
-| Root directory | Raíz del repositorio: vacío o `/`, no `campus` |
-| Build command | Vacío: el comando siguiente compila y valida |
-| Deploy command | `python3 campus/cloudflare.py deploy` |
-| Non-production branch deploy command | `python3 campus/cloudflare.py preview` |
-| Build variable | `SKIP_DEPENDENCY_INSTALL=1` |
-| Build variable | `PYTHON_VERSION=3.13` |
+| Repository | `WiktorNykiel/fundamentos-ciberseguridad` |
+| Production branch | `main`, after this release has been integrated |
+| Root directory | `campus` |
+| Framework | None / Ninguno |
+| Build command | `python3 build.py && python3 check_release.py` |
+| Build output directory | `dist` |
+| Environment variable | `SKIP_DEPENDENCY_INSTALL=1` |
+| Python version | `PYTHON_VERSION=3.13` |
 
-Guarda los ajustes y lanza un build del **último commit de main**, no una repetición del checkout antiguo. La opción exacta del panel puede variar. Si el panel ya conserva un build command Next.js/OpenNext, bórralo: se ejecutaría antes del wrapper. No cambies tokens ni crees un servicio ficticio llamado `frontend`.
+Use a preview branch for initial testing. Connecting an older branch does not deploy the new release. Set variables for both production and previews where appropriate. No application secrets are needed to build or serve the static site. The two commands must both succeed; do not replace errors with `|| true`.
 
-`cloudflare.py` resuelve sus rutas desde el propio archivo, compila, valida y solo entonces llama a **Wrangler 4.132.0** con `--config` explícito. Su modo `preview` utiliza `versions upload`: sube una versión de prueba, no promueve producción. `deploy` sí cambia producción. Una carga correcta de versión y un despliegue activo no son lo mismo.
+## Direct Upload for a trial / ZIP para prueba
 
-Esta preparación del repositorio **no modifica automáticamente los ajustes del panel**. Workers Builds documenta que no toma su fase de build de la sección Custom Builds del archivo Wrangler; por eso la preparación se incluye en el propio comando de despliegue. La instalación automática se omite para no instalar la aplicación de referencia.
+Build from the repository root:
 
-### Prueba local sin publicar
+```sh
+python3 campus/build.py
+python3 campus/check_release.py
+```
+
+Upload **`campus/pages-ready.zip`**, whose root contains `index.html`, not the sources ZIP or the outer GitHub Actions artifact ZIP. When downloading an Actions artifact, extract its enclosed `pages-ready.zip` first. The manifest validator checks files, catalogue parity, headers, local asset references and byte equality between folder and ZIP.
+
+The Pages dashboard accepts a ZIP; Wrangler Pages upload uses a directory. A Direct Upload project cannot be converted into a Git-integrated Pages project. Choose Git integration from the start for continuous updates, or create a separate trial project for manual upload.
+
+## Existing Workers Builds / Worker existente
+
+Preserve the explicit root `wrangler.jsonc` and `campus/cloudflare.py` wrapper. This release retains them; it does not modify your Cloudflare account.
+
+| Setting | Value |
+|---|---|
+| Root directory | repository root |
+| Build command | empty, because the wrapper builds and validates |
+| Production deploy command | `python3 campus/cloudflare.py deploy` |
+| Preview/version upload command | `python3 campus/cloudflare.py preview` |
+| Environment | `SKIP_DEPENDENCY_INSTALL=1`, `PYTHON_VERSION=3.13` |
+
+Inspect without publishing:
 
 ```sh
 python3 campus/cloudflare.py plan
@@ -37,59 +54,26 @@ python3 campus/cloudflare.py build
 python3 campus/cloudflare.py dry-run
 ```
 
-Los dos primeros comandos no necesitan red ni credenciales. `dry-run` puede descargar Wrangler mediante npm, pero no sube activos ni versiones. Se utiliza una versión fijada, no `latest`. Node.js/npm solo se requieren para Wrangler; no son dependencias del campus publicado. La instalación de la CLI no se confunde con instalar el package.json Next.js de la raíz.
+`deploy` publishes production; `preview` uploads a test version; `dry-run` does neither. Use the provider's authorized credentials locally or in its build environment, never paste them into chat, source files, screenshots or logs. Run `python3 campus/cloudflare.py --help` to verify supported operations. Do not run bare `npx wrangler deploy` from the legacy app and allow framework migration to change configuration implicitly.
 
-Para inspeccionar respuestas del runtime local:
+## Acceptance after publication / Prueba del alojamiento
 
-```sh
-npx --yes wrangler@4.132.0 dev --config wrangler.jsonc --local --ip 127.0.0.1 --port 8789
-```
+Open the actual provider URL with `?lang=es#/curso` and `?lang=en#/curso`. Verify the release version and source commit in `/build-info.json`. Then check the syllabus filters; theory/labs/self-check in M05; L05A five phases and recovery; language switching without lost notes; presentation and keyboard; export/import; and a progress link between two separate browser profiles. Import must require confirmation and must not transfer notes. Try 320/390px phone and 768/820px tablet widths, portrait and landscape, then a real iPad/Safari when available.
 
-No se configura una ruta pública, un dominio ni un binding remoto durante esta prueba. No uses `--remote`. El servidor Python `python3 campus/serve.py --port 8788` sigue disponible para la vista previa ordinaria.
+Confirm `_headers` protections are delivered, absent files return 404 rather than misleading HTML success, no unintended external font/analytics request exists and the kit downloads. Static HTML rendering, browser tests and provider hosting are separate checks. Do not claim an account deployment from a local Wrangler test.
 
-## B. Cloudflare Pages conectado a GitHub
+## Rollback and troubleshooting / Recuperación
 
-Crea un proyecto de tipo **Pages** con integración Git. No reutilices los campos de comandos de versiones de Workers.
+Keep the previous accepted deployment and its matching ZIP/commit. Restore via the provider's deployment history or republish that exact verified release. Do not delete the learner's local storage when rolling back. Domain/origin changes require exporting progress first; browser storage is origin-scoped.
 
-| Campo | Valor |
-|---|---|
-| Repositorio / rama | `WiktorNykiel/fundamentos-ciberseguridad` / `main` |
-| Directorio raíz | `campus` |
-| Framework preset | Ninguno |
-| Build command | `python3 build.py && python3 check_release.py` |
-| Build output directory | `dist` |
-| Variable | `SKIP_DEPENDENCY_INSTALL=1` |
-| Variable | `PYTHON_VERSION=3.13` |
+For a blank page, inspect browser errors and verify JavaScript MIME, CSP, paths and the catalogue files. For a wrong application, check root, build command and output. For missing English data, stop the build and restore complete `campus/locales/en/` sources rather than silently substituting Spanish. For an import failure, check expiry, correct catalogue, secure context and recipient confirmation; use a private JSON copy as fallback.
 
-Pages no usa el wrapper `deploy` ni `versions upload`. La raíz Wrangler del repositorio es para **Workers**; el proyecto Pages se configura con su raíz propia `campus` y no debe apuntar a la raíz Next.js. El campus no necesita un archivo Wrangler de Pages para esta integración.
+## Official references / Referencias
 
-## C. Pages mediante Direct Upload
+- [Pages build configuration](https://developers.cloudflare.com/pages/configuration/build-configuration/)
+- [Build image and environment](https://developers.cloudflare.com/pages/configuration/build-image/)
+- [Direct Upload](https://developers.cloudflare.com/pages/get-started/direct-upload/)
+- [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/)
+- [Wrangler configuration](https://developers.cloudflare.com/workers/wrangler/configuration/)
 
-Para una prueba manual sin conectar Git, compila y valida, o descarga el artefacto `cloudflare-pages-ready` de una ejecución correcta de Actions. Extrae el contenedor del artefacto GitHub y sube **el ZIP interior `pages-ready.zip`**, que contiene `index.html` en su raíz. No subas un ZIP de fuentes ni un ZIP que solo contiene otro ZIP.
-
-El panel de Pages admite ZIP. La CLI de Pages recibe una carpeta. La elección inicial importa: un proyecto Direct Upload no se convierte después en integración Git; crea uno Git desde el principio si necesitas actualizaciones automáticas.
-
-## Aceptación después de publicar
-
-Usa exclusivamente la URL que devuelva Cloudflare. Comprueba `/build-info.json`: el commit debe coincidir con el checkout desplegado; los recuentos esperados son **32 módulos, 96 fichas, 21 recursos y 480 horas**. Abre `#/temario`, filtra Linux y confirma ocho módulos; filtra macOS y confirma cuatro. Prueba una búsqueda, M05, L05A, autoevaluación, presentación y recarga con progreso.
-
-Comprueba `course.json` como JSON, los scripts con su tipo correcto y una ruta inexistente con HTTP 404. Las rutas del curso son fragmentos `#/...`: no necesitan redirigir todos los archivos inexistentes a HTML. Revisa CSP, `nosniff` y ausencia de claves o llamadas a modelos. El asistente sigue siendo manual.
-
-Exporta el progreso antes de cambiar de origen. Las marcas son locales, autodeclaradas y no cifradas. Una pantalla de compilación verde no acredita el funcionamiento de la URL final.
-
-## Recuperación y diagnóstico
-
-Si aparece `Next.js`, `.next`, `.open-next`, `opennextjs-cloudflare` o `WORKER_SELF_REFERENCE`, revisa la raíz y los comandos: no corresponde al campus. Si faltan activos, comprueba que no se omitió la compilación o que no se reintentó un commit anterior. Si faltan Python o npx, comprueba la versión de la imagen de build antes de instalar nada con privilegios.
-
-No borres recursos creados por intentos anteriores sin inventario: el primer log muestra actividad sobre un bucket de caché, pero no demuestra su estado actual ni autoriza una limpieza ciega. Para volver atrás utiliza una versión previamente aceptada del producto elegido; luego verifica la URL y el contenido. Guarda logs minimizados fuera del repositorio público.
-
-## Fuentes oficiales consultadas
-
-- [Workers Builds: configuración, comandos y autodetección](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/).
-- [Workers: imagen de build y SKIP_DEPENDENCY_INSTALL](https://developers.cloudflare.com/workers/ci-cd/builds/build-image/).
-- [Workers Static Assets: configuración sin backend](https://developers.cloudflare.com/workers/static-assets/binding/).
-- [Cabeceras de activos](https://developers.cloudflare.com/workers/static-assets/headers/).
-- [Pages: configuración de build](https://developers.cloudflare.com/pages/configuration/build-configuration/).
-- [Pages: Direct Upload](https://developers.cloudflare.com/pages/get-started/direct-upload/).
-
-La revisión de documentación y las pruebas locales/CI se registran por separado de un despliegue real. Esta guía no inventa una URL ni una confirmación del proveedor.
+Prepared does not mean deployed. This document does not assert an active public URL, account setup or OTP service. For optional identity see [IDENTITY-OPTIONAL.md](IDENTITY-OPTIONAL.md).

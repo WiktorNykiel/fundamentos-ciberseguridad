@@ -1,39 +1,30 @@
-# Campus web · Fundamentos de ciberseguridad
+# Campus ES/EN · Fundamentos de ciberseguridad / Cybersecurity foundations
 
-**Wiktor Nykiel · Versión 2.2.0 · Español · Interfaz clara.**
+**Wiktor Nykiel · 2.3.0 · Independent learning · Light interface.**
 
-Campus estático generado desde el temario del repositorio: 32 módulos, 480 horas planificadas, 96 fichas, 32 apuntes y 32 autoevaluaciones públicas. Incluye las ocho guías R01–R08 y una biblioteca de 21 recursos. El contenido diseñado no se presenta como práctica nativa ejecutada.
+## Español
 
-[Desplegar en Cloudflare](DEPLOY-CLOUDFLARE.md) · [Editar el curso](EDICION.md) · [Cómo estudiar](../formacion/sistemas-operativos/COMO-ESTUDIAR.md) · [Pruebas](QA.md)
+Campus estático para estudiar, repasar en presentación y seguir prácticas guiadas. La edición activa conserva **32 módulos, 96 fichas, ocho guías ampliadas, 21 referencias y 480 horas planificadas**. Español e inglés son ediciones docentes paralelas con los mismos IDs, prerrequisitos y horas. Las cifras no equivalen a asistencia ni ejecución de laboratorios.
 
-## Workers y Pages: dos rutas, una salida
+El selector ES/EN cambia interfaz, contenidos, fichas, autoevaluaciones y referencias sin reiniciar progreso. El índice filtra por texto, bloque y avance; la biblioteca y búsqueda conectan las lecturas. La presentación usa el contenido del módulo, no una segunda copia de diapositivas. Hay lectura continua sin JavaScript en `lectura.html` y `reading.en.html`.
 
-`wrangler.jsonc` de la raíz declara los activos de `campus/dist` para Workers, sin backend ni bindings a servicios. `python3 campus/cloudflare.py build` compila y comprueba sin red; `dry-run` valida Wrangler sin publicar; `deploy` y `preview` son acciones remotas explícitas. La [guía](DEPLOY-CLOUDFLARE.md) separa los ajustes del Worker existente de los de Pages y explica los dos errores observados en los logs. No se copian los logs originales al repositorio público.
+**Continuidad:** las marcas y notas se guardan en este navegador; exportación/importación JSON para copia completa y enlace de progreso para una copia sin notas. La ruta de continuación se conserva por pestaña. Compartir una lección no comparte progreso. El enlace de progreso no es una cuenta ni transfiere autenticación. Leer [PROGRESO.md](PROGRESO.md) antes de compartir.
 
-## Navegación para aprender
+**Guía, no terminal remota:** identifica entorno, ejecuta manualmente, comprueba, documenta evidencia y recupera. Las consultas de identificación no convierten una práctica Linux en Windows o macOS. No se ejecuta texto suministrado por alumnos o IA.
 
-| Ruta | Función |
-|---|---|
-| `#/empezar` | Orientación, preparación, método y conservación del progreso |
-| `#/curso` | Siete bloques y continuación del recorrido |
-| `#/temario` | Índice de 32 módulos con horas, prerrequisitos y accesos directos |
-| `#/laboratorios` | Catálogo de 96 fichas filtrable por bloque |
-| `#/recursos` | Biblioteca interna: referencias y lecciones ampliadas |
-| `#/progreso` | Lecturas, prácticas, favoritos, exportación e importación |
-| `#/modulo/M05` | Teoría con índice interno, texto ampliable y notas |
-| `#/modulo/M05/practicas` | Prácticas del módulo |
-| `#/modulo/M05/revision` | Autoevaluación formativa |
-| `#/modulo/M05/practica/L05A` | Asistente de cinco fases |
+## English
 
-El índice completo dispone de filtros de bloque, texto y avance con contador accesible y reinicio. Los filtros no cambian notas ni progreso. D21 incorpora una actividad de consolidación sobre despliegue estático, sin añadir horas al programa.
+A static campus for reading, presentation-based review and guided lab work. The active course has **32 modules, 96 lab briefs, eight extended guides, 21 references and 480 planned hours**. English and Spanish editions retain the same learning IDs, prerequisites and planned hours. These are not attendance or lab-execution records.
 
-La búsqueda por varias palabras ignora mayúsculas y tildes y consulta módulos y documentos. Los prerrequisitos orientan sin bloquear. Los enlaces antiguos D01–D18 conservan su significado; D19 y D20 incorporan plan docente y guía de estudio.
+The language selector changes the interface and learning material without resetting progress. Use the syllabus filters, internal index, search, library and previous/next navigation. Continuous reading is also available without JavaScript.
 
-La presentación reutiliza la teoría: flechas, Escape, pantalla completa cuando se admite y desplazamiento de texto largo. `lectura.html` permite consultar e imprimir sin JavaScript. Las tablas disponen de desplazamiento local y la interfaz se adapta al móvil.
+Learning records remain in the browser. JSON backups include notes; portable links exclude them and transfer only a snapshot of milestones and resume location. A link is not authentication, cloud synchronization or a certificate. Anyone holding the full link can read and import it. See [progress and transfer](PROGRESO.md).
 
-## Compilar y comprobar
+The guide does not execute commands or connect to hosts. Complete native tasks manually inside the authorized lab; a mobile viewport is not a virtual operating system.
 
-Desde la raíz de una copia completa:
+## Build and preview / Compilar y previsualizar
+
+From the repository root, using Python 3.11 or later:
 
 ```sh
 python3 campus/build.py
@@ -41,34 +32,18 @@ python3 campus/check_release.py
 python3 campus/serve.py --port 8788
 ```
 
-Abrir `http://127.0.0.1:8788`, no `file://`. Python 3.11+; sin dependencias de producción ni red durante el build. El servidor de previsualización solo escucha en loopback y no es un backend de producción.
+Open `http://127.0.0.1:8788/?lang=es` or `http://127.0.0.1:8788/?lang=en`. No npm installation, account, database or API key is required for the static campus. Node and Playwright are test tools; the independent Next.js application is not a campus dependency.
 
-Se generan `dist/`, `pages-ready.zip`, `build-info.json` y `SHA256SUMS.txt`. El validador verifica catálogo, activos, cabeceras, hashes y equivalencia ZIP/directorio. `sourceCommit` identifica el checkout cuando Cloudflare o Actions aporta su SHA; no se inventa en compilaciones locales.
+## Documentation / Documentación
 
-**Pages:** raíz `campus`; framework ninguno; comando `python3 build.py && python3 check_release.py`; salida `dist`; `SKIP_DEPENDENCY_INSTALL=1`. El sitio no utiliza la aplicación Next.js de la raíz. La URL válida será la devuelta por Cloudflare tras publicar; un commit no equivale a un despliegue.
+| Topic | Document |
+|---|---|
+| Cloudflare Pages and existing Workers setup | [DEPLOY-CLOUDFLARE.md](DEPLOY-CLOUDFLARE.md) |
+| Progress, transfers and privacy | [PROGRESO.md](PROGRESO.md) |
+| Optional identity and OTP design, not enabled | [IDENTITY-OPTIONAL.md](IDENTITY-OPTIONAL.md) |
+| Editorial design and accessibility scope | [DESIGN.md](DESIGN.md) |
+| Content authoring and translations | [EDICION.md](EDICION.md) |
+| Tests and limitations | [QA.md](QA.md) |
+| Integration and acceptance | [INTEGRATION.md](INTEGRATION.md) |
 
-## Progreso y asistente: límites
-
-160 hitos autodeclarados: lectura, autoevaluación y tres prácticas por módulo. Las cinco fases deben confirmarse antes de finalizar una práctica. Notas, favoritos y marcas se guardan en localStorage, sin cuentas, cifrado ni sincronización entre dispositivos. Exportar antes de cambiar de dominio o navegador. La importación valida tamaño UTF-8, esquema, IDs y rutas. Evitar editar el mismo módulo en varias pestañas a la vez.
-
-El asistente es una guía editorial, no una terminal ni un modelo de IA. No abre SSH/WinRM/RDP, recibe claves ni ejecuta comandos. La comprobación de R01 compara cifras introducidas manualmente con el dataset oslab.py. Windows y macOS requieren sus sistemas nativos. Las marcas no miden horas ni certifican competencias.
-
-## Edición y seguridad
-
-El catálogo canónico está en `formacion/sistemas-operativos/planificacion/curriculo.json`. Los Markdown definen teoría y fichas; `content.py` añade apuntes y autoevaluaciones. `assets/navigation.js` genera el índice, orientación y búsqueda, sin otro catálogo manual. Recompilar actualiza lectura, presentación y asistente.
-
-El parser escapa HTML crudo y limita protocolos; no ejecuta MDX ni instrucciones. La selección de documentos públicos es explícita. No incorporar expedientes, correos, secretos o exámenes reservados. La aplicación no añade analítica ni llamadas a modelos; el alojamiento puede conservar sus propios registros.
-
-## Pruebas reproducibles
-
-```sh
-python3 -m unittest discover -s campus/tests -p 'test_*.py' -v
-node --test campus/tests/*.test.mjs
-python3 campus/build.py
-python3 campus/check_release.py
-python3 -m pip install playwright==1.55.0
-python3 -m playwright install chromium
-python3 campus/tests/browser_extra.py
-```
-
-La dependencia Playwright solo pertenece al entorno de pruebas. CI conserva diagnósticos incluso con fallos y publica el artefacto `cloudflare-pages-ready` únicamente tras superar la aceptación. Consultar el resultado de la ejecución concreta: existir una prueba no significa haberla superado. Las pruebas web no acreditan ejecución de las 96 prácticas nativas.
+The expansion master plan remains in `formacion/plan-maestro/` on the main branch: 18 areas and 108 proposed units, not 108 additional active bilingual lessons. Its English overview is not a complete translation of that separate reference. This release does not change the course hours, repository license, access policies or account settings. No institutional name, logo, endorsement or affiliation is used.
