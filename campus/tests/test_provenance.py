@@ -53,6 +53,16 @@ class ProvenanceTests(unittest.TestCase):
         self.git('add','.');self.git('-c','user.name=Test','-c','user.email=test@example.invalid','commit','-qm','ignore fixture')
         local=course/'lecciones';local.mkdir();(local/'local.md').write_text('fixture')
         self.assertIsNone(source_commit(self.root))
+    def test_ignored_path_input_is_not_attributed(self):
+        (self.root/'.gitignore').write_text('formacion/rutas/local*.json\nawesome-dpd/site/\n')
+        self.git('add','.');self.git('-c','user.name=Test','-c','user.email=test@example.invalid','commit','-qm','ignore routes')
+        folder=self.root/'formacion/rutas';folder.mkdir(parents=True);(folder/'local.json').write_text('{}')
+        self.assertIsNone(source_commit(self.root))
+    def test_generated_dpd_site_does_not_change_checkout(self):
+        (self.root/'.gitignore').write_text('awesome-dpd/site/\n')
+        self.git('add','.');self.git('-c','user.name=Test','-c','user.email=test@example.invalid','commit','-qm','ignore site')
+        folder=self.root/'awesome-dpd/site';folder.mkdir(parents=True);(folder/'index.html').write_text('generated')
+        self.assertEqual(source_commit(self.root),self.git('rev-parse','HEAD'))
     def test_build_checks_before_collecting_or_writing(self):
         order=[]
         with patch.object(build,'source_commit',side_effect=lambda root:order.append('provenance')):

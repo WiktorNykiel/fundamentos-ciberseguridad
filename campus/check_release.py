@@ -12,7 +12,7 @@ HERE=Path(__file__).resolve().parent
 def validate(directory: Path, archive: Path) -> dict:
     if directory.is_symlink() or not directory.is_dir():
         raise ValueError('La salida debe ser un directorio regular.')
-    required={'index.html','course.json','course.en.json','reading.en.html','assets/i18n.js','assets/portable.js','lectura.html','_headers','build-info.json','assets/app.js','assets/state.js','assets/navigation.js','assets/styles.css','SHA256SUMS.txt','404.html','assets/catalog.js','assets/catalog.css'}
+    required={'rutas.html','assets/routes.css','assets/routes.js','dpd/index.html','index.html','course.json','course.en.json','reading.en.html','assets/i18n.js','assets/portable.js','lectura.html','_headers','build-info.json','assets/app.js','assets/state.js','assets/navigation.js','assets/styles.css','SHA256SUMS.txt','404.html','assets/catalog.js','assets/catalog.css'}
     files={p.relative_to(directory).as_posix():p for p in directory.rglob('*') if p.is_file() and not p.name.startswith('.')}
     if any(p.is_symlink() for p in directory.rglob('*')): raise ValueError('No se admiten enlaces simbólicos.')
     if not required <= files.keys(): raise ValueError('Faltan activos: '+', '.join(sorted(required-files.keys())))
@@ -45,7 +45,7 @@ def validate(directory: Path, archive: Path) -> dict:
     for value in ["script-src 'self'","object-src 'none'","frame-ancestors 'none'",'nosniff']:
         if value not in headers: raise ValueError('Falta una protección: '+value)
     if 'unsafe-inline' in headers or 'unsafe-eval' in headers: raise ValueError('CSP permisiva.')
-    for rel in ('index.html','lectura.html','reading.en.html'):
+    for rel in ('index.html','lectura.html','reading.en.html','rutas.html'):
         text=files[rel].read_text()
         for target in re.findall(r'(?:src|href)="([^"]+)"',text):
             if target.startswith(('https://','#','./')): continue

@@ -2,9 +2,9 @@ name: Campus - build and acceptance
 on:
   push:
     branches: [main, feat/campus-es-en-portable, maintenance/review-integration-20260915]
-    paths: ['campus/**', 'formacion/sistemas-operativos/**', 'scripts/verify_pr_ancestry.py', '.github/workflows/campus.yml', 'package.json', 'package-lock.json', 'wrangler.jsonc']
+    paths: ['campus/**', 'formacion/sistemas-operativos/**', 'formacion/rutas/**', 'awesome-dpd/**', 'scripts/verify_pr_ancestry.py', '.github/workflows/campus.yml', 'package.json', 'package-lock.json', 'wrangler.jsonc']
   pull_request:
-    paths: ['campus/**', 'formacion/sistemas-operativos/**', 'scripts/verify_pr_ancestry.py', '.github/workflows/campus.yml', 'package.json', 'package-lock.json', 'wrangler.jsonc']
+    paths: ['campus/**', 'formacion/sistemas-operativos/**', 'formacion/rutas/**', 'awesome-dpd/**', 'scripts/verify_pr_ancestry.py', '.github/workflows/campus.yml', 'package.json', 'package-lock.json', 'wrangler.jsonc']
   workflow_dispatch:
 permissions:
   contents: read
@@ -35,6 +35,10 @@ jobs:
         run: |
           set -o pipefail
           python3 -m unittest discover -s campus/tests -p 'test_*.py' -v 2>&1 | tee campus/qa/compiler.log
+      - name: Independent DPD catalogue checks
+        run: |
+          python3 awesome-dpd/tools/validate.py
+          python3 -m unittest discover -s awesome-dpd/tests -v
       - name: Progress and navigation tests
         shell: bash
         run: |
@@ -56,6 +60,7 @@ jobs:
         run: |
           set -o pipefail
           python3 campus/tests/browser_bilingual.py 2>&1 | tee campus/qa/browser.log
+          python3 campus/tests/browser_routes.py 2>&1 | tee campus/qa/routes-browser.log
       - name: WebKit acceptance
         shell: bash
         env:
@@ -63,6 +68,7 @@ jobs:
         run: |
           set -o pipefail
           python3 campus/tests/browser_bilingual.py 2>&1 | tee campus/qa/browser-webkit.log
+          python3 campus/tests/browser_routes.py 2>&1 | tee campus/qa/routes-webkit.log
       - name: Existing kit tests
         working-directory: formacion/sistemas-operativos/kit
         run: python3 -m unittest discover -p 'test_*.py' -v
@@ -90,6 +96,8 @@ jobs:
           path: |
             campus/
             formacion/sistemas-operativos/
+            formacion/rutas/
+            awesome-dpd/
             README.md
             scripts/verify_pr_ancestry.py
             wrangler.jsonc

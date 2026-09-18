@@ -1,14 +1,24 @@
 # Fundamentos de ciberseguridad
 
-**Wiktor Nykiel · Campus 2.2 · Linux, Windows y macOS · Interfaz clara**
+**Wiktor Nykiel · Campus 2.3 · Linux, Windows y macOS · Interfaz clara**
 
 Aprende a comprender, administrar, automatizar, proteger e investigar sistemas. El curso combina teoría, terminal, prácticas guiadas y evidencias. Los materiales son públicos; las horas describen planificación, no una acreditación automática.
+
+## Rutas por perfil y Awesome DPD
+
+**[No técnico · Legal · DPD · Técnico · Informático · Ciber](formacion/rutas/README.md)** — seis recorridos por función, con etapas, evidencias, referencias a módulos, prerrequisitos y certificaciones opcionales. El build añade `rutas.html`, con vista de presentación, impresión y avance local opcional.
+
+**[Awesome DPD](awesome-dpd/README.md)** — colección inicial independiente con fuentes oficiales anotadas, requisitos de credenciales, itinerario, casos y plantillas ficticias. Se prepara para un repositorio público propio de SmartKEA; su creación administrativa y la transferencia de fundamentos aún no se han ejecutado.
+
+El currículo base sigue siendo **32 módulos / 96 prácticas / 480 horas planificadas**. Las horas de orientación no se suman al currículo ni equivalen a formación reconocida AEPD-DPD. La orientación nueva está en español; el campus principal mantiene ES/EN.
+
+[Revisión de ramas y límites](docs/review-20260918.md) · [Publicación en SmartKEA](awesome-dpd/PUBLICACION.md)
 
 ## Ampliación curricular y próxima entrega
 
 El [plan maestro](formacion/plan-maestro/README.md) estructura **18 áreas y 108 unidades propuestas**, desde introducción a la informática hasta cloud, contenedores, gobierno, riesgos, AppSec, Blue Team, CTI y resiliencia. Añade diseños de laboratorio, correspondencias parciales CSF–RGPD–ISO–ENS, un caso numérico de riesgo y un glosario de 110 entradas ES/EN.
 
-Es una **referencia de desarrollo**, no un nuevo catálogo activo ni horas adicionales ya impartidas. Conserva los 32 módulos, 96 fichas y 480 horas actuales. Las instrucciones para continuar, el bilingüismo completo, la accesibilidad móvil y el traspaso seguro de progreso están en [Continuación](formacion/plan-maestro/08-continuacion.md). Hay un [resumen en inglés](formacion/plan-maestro/OVERVIEW.en.md); no se presenta como traducción integral del curso.
+Es una **referencia de desarrollo**, no un nuevo catálogo activo ni horas adicionales ya impartidas. Conserva los 32 módulos, 96 fichas y 480 horas actuales. El campus troncal ya dispone de contenido ES/EN y traspaso cifrado de progreso. [Continuación](formacion/plan-maestro/08-continuacion.md) conserva el registro del plan maestro, no el estado actualizado de esas funciones. Su [resumen en inglés](formacion/plan-maestro/OVERVIEW.en.md) es parcial; se distingue de la traducción completa de los 32 módulos del campus.
 
 ## Publicar sin confundir las aplicaciones
 
@@ -70,6 +80,8 @@ Abrir `http://127.0.0.1:8788`. Usar Python 3.11 o posterior. El campus no necesi
 campus/                         Web estática, compilador, pruebas y guía de Pages
 formacion/sistemas-operativos/   Temario, lecciones, prácticas, kit y evaluación
 formacion/plan-maestro/          Ampliación curricular y referencia para continuar
+formacion/rutas/                 Seis rutas por perfil y método de estudio
+awesome-dpd/                    Catálogo DPD independiente, documentos y web
 src/                            Aplicación Next.js de referencia, independiente
 scripts/                        Comprobaciones de integración e historial
 .github/workflows/              Validación del campus, referencias y aplicación
