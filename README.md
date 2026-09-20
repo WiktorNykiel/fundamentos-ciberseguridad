@@ -1,5 +1,7 @@
 # Fundamentos de ciberseguridad
 
+> **Este campus se ha trasladado a SmartKEA.** El repositorio público mantenido es [smartkea-cyberinnovation/fundamentos-ciberseguridad](https://github.com/smartkea-cyberinnovation/fundamentos-ciberseguridad) y la web continúa en [smartkea.com/introduccion-ciberseguridad/](https://smartkea.com/introduccion-ciberseguridad/). Los contenidos actuales y sus futuras actualizaciones se encuentran en el nuevo repositorio. Este repositorio conserva el código anterior y su historial como referencia; la [nota de migración](https://github.com/smartkea-cyberinnovation/fundamentos-ciberseguridad/blob/main/docs/MIGRATION.md) documenta el snapshot trasladado y su alcance.
+
 **Wiktor Nykiel · Campus 2.3 · Linux, Windows y macOS · Español e inglés**
 
 Campus de SmartKEA: **https://smartkea.com/introduccion-ciberseguridad/**. El código público se conserva en [WiktorNykiel/fundamentos-ciberseguridad](https://github.com/WiktorNykiel/fundamentos-ciberseguridad).
