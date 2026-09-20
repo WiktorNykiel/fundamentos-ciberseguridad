@@ -1,42 +1,74 @@
 #!/usr/bin/env python3
-"""Read-only HTTP smoke test for an explicitly started local Wrangler runtime."""
+"""Read-only HTTP acceptance of the campus at its real subpath; never runs labs."""
+import argparse
 import json
-import subprocess
-import time
 from pathlib import Path
+import re
+import sys
+import time
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit
 from urllib.request import urlopen
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from publication import PUBLIC_BASE_PATH, PUBLIC_URL
+from provenance import source_commit
 
-BASE='http://127.0.0.1:8789'
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--origin', default='http://127.0.0.1:8789')
+args = parser.parse_args()
+origin = args.origin.rstrip('/')
+base = origin + PUBLIC_BASE_PATH
 for attempt in range(80):
     try:
-        with urlopen(BASE,timeout=2) as r:
-            assert r.status==200
-            assert 'Fundamentos' in r.read().decode()
-            assert "script-src 'self'" in r.headers.get('Content-Security-Policy','')
-            assert r.headers.get('X-Content-Type-Options')=='nosniff'
+        with urlopen(base,timeout=2) as response:
+            assert response.status==200
+            assert 'Fundamentos' in response.read().decode()
+            assert "script-src 'self'" in response.headers.get('Content-Security-Policy','')
+            assert response.headers.get('X-Content-Type-Options')=='nosniff'
         break
     except (URLError,TimeoutError):
         if attempt==79:raise
         time.sleep(.25)
-with urlopen(BASE+'/course.json',timeout=5) as r:
-    data=json.load(r)
+with urlopen(base+'course.json',timeout=5) as response:
+    data=json.load(response)
     assert data['id']=='fundamentos-ciberseguridad'
     assert len(data['modules'])==32 and data['hours']==480
     assert len(data['resources'])==21
-with urlopen(BASE+'/course.en.json',timeout=5) as r:
-    english=json.load(r);assert english['language']=='en'
-    assert len(english['modules'])==32 and sum(len(m['labs']) for m in english['modules'])==96
-with urlopen(BASE+'/build-info.json',timeout=5) as r:
-    info=json.load(r);assert info['version']=='2.3.0'
-    root=Path(__file__).resolve().parents[2]
-    expected=subprocess.run(['git','rev-parse','HEAD'],cwd=root,check=True,capture_output=True,text=True,timeout=5).stdout.strip()
-    assert info['sourceCommit']==expected, 'The runtime must serve the actual clean checkout commit.'
-with urlopen(BASE+'/assets/catalog.js',timeout=5) as r:
-    assert 'javascript' in r.headers.get('Content-Type','')
-try:
-    urlopen(BASE+'/not-a-real-file-123456.json',timeout=5)
-    raise AssertionError('Una ruta inexistente no debe devolver éxito HTML.')
-except HTTPError as e:
-    assert e.code==404
-print(json.dumps({'status':'passed','runtime':'wrangler-local','checks':6,'sourceCommit':info['sourceCommit'],'remoteDeployment':False}))
+with urlopen(base+'course.en.json',timeout=5) as response:
+    english=json.load(response);assert english['language']=='en'
+    assert len(english['modules'])==32 and sum(len(module['labs']) for module in english['modules'])==96
+with urlopen(base+'build-info.json',timeout=5) as response:
+    info=json.load(response);assert info['version']=='2.3.0'
+    assert info['publicBasePath']==PUBLIC_BASE_PATH and info['publicUrl']==PUBLIC_URL
+    expected=source_commit(Path(__file__).resolve().parents[2])
+    assert info['sourceCommit']==expected, 'The runtime must match the current checkout provenance.'
+    if urlsplit(origin).hostname not in ('127.0.0.1','localhost'):
+        assert expected, 'Remote acceptance requires a clean, committed checkout.'
+with urlopen(base+'assets/catalog.js',timeout=5) as response:
+    assert 'javascript' in response.headers.get('Content-Type','')
+for name in ('not-a-real-file-123456.json','nested/not-a-real-file.html'):
+    try:
+        urlopen(base+name,timeout=5)
+        raise AssertionError('A missing path must return 404, not successful HTML.')
+    except HTTPError as error:
+        assert error.code==404
+        page=error.read().decode()
+        assert 'File not found.' in page
+        for link in re.findall(r'(?:href|src)="([^"]+)"',page):
+            path=urlsplit(link).path
+            assert path.startswith(PUBLIC_BASE_PATH)
+            with urlopen(origin+path,timeout=5) as asset:
+                assert asset.status==200
+                if path.endswith('.css'):assert 'text/css' in asset.headers.get('Content-Type','')
+markers = [PUBLIC_BASE_PATH.lstrip('/')+'.campus-generated']
+if urlsplit(origin).hostname in ('127.0.0.1','localhost') or urlsplit(origin).hostname.endswith('.workers.dev'):
+    markers.append('.campus-worker-generated')
+for name in markers:
+    try:
+        urlopen(origin+'/'+name,timeout=5)
+        raise AssertionError('An internal generator marker must not be public.')
+    except HTTPError as error:
+        assert error.code==404
+print(json.dumps({'status':'passed','runtime':origin,'publicBasePath':PUBLIC_BASE_PATH,
+                  'checks':9,'sourceCommit':info['sourceCommit'],
+                  'remoteDeployment':urlsplit(origin).hostname not in ('127.0.0.1','localhost')}))

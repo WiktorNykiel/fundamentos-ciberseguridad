@@ -69,11 +69,16 @@ class BrowserAcceptance(unittest.TestCase):
         expect(self.page.locator('#notes')).to_have_value('Synthetic private study note')
         self.page.reload();expect(self.page.locator('#notes')).to_have_value('Synthetic private study note')
     def test_04_syllabus_filters(self):
-        self.go('#/temario','en');expect(self.page.locator('[data-outline-row]:visible')).to_have_count(32)
-        self.page.locator('#outline-query').fill('M05');expect(self.page.locator('[data-outline-row]:visible')).to_have_count(1)
-        self.page.locator('#outline-query').fill('nothing-12345');expect(self.page.locator('#outline-empty')).to_be_visible()
-        self.page.locator('#outline-reset').click();expect(self.page.locator('[data-outline-row]:visible')).to_have_count(32)
-        self.page.locator('#outline-block').select_option('linux');expect(self.page.locator('[data-outline-row]:visible')).to_have_count(8)
+        for lang in ('es','en'):
+            with self.subTest(lang=lang):
+                self.go('#/temario',lang);expect(self.page.locator('[data-outline-row]:visible')).to_have_count(32)
+                for query in ('M05',' m05 '):
+                    self.page.locator('#outline-query').fill(query)
+                    expect(self.page.locator('[data-outline-row]:visible')).to_have_count(1)
+                    expect(self.page.locator('[data-outline-row]:visible')).to_have_attribute('data-module','M05')
+                self.page.locator('#outline-query').fill('nothing-12345');expect(self.page.locator('#outline-empty')).to_be_visible()
+                self.page.locator('#outline-reset').click();expect(self.page.locator('[data-outline-row]:visible')).to_have_count(32)
+                self.page.locator('#outline-block').select_option('linux');expect(self.page.locator('[data-outline-row]:visible')).to_have_count(8)
     def test_05_formative_quiz(self):
         self.go('#/modulo/M01/revision','en');correct=self.catalogs['en']['modules'][0]['quiz']['correct']
         self.page.locator(f'input[name=answer][value="{correct}"]').check();self.page.locator('#quiz button').click()
