@@ -4,6 +4,7 @@
 `build`, `check` and `plan` need no network or account. `dry-run` downloads the
 pinned Wrangler CLI when absent but does not upload. `deploy` changes production;
 `preview` uploads a version without promoting it. No shell or content execution.
+The Wrangler custom build calls only `build`: it must never recursively call npx.
 """
 from __future__ import annotations
 import argparse
@@ -19,6 +20,8 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 CONFIG = ROOT / 'wrangler.jsonc'
 WRANGLER = '4.132.0'
+BUILD = {'command': 'python3 campus/cloudflare.py build', 'cwd': '.',
+         'watch_dir': ['campus', 'formacion']}
 
 
 def check_config(path: Path = CONFIG) -> dict:
@@ -26,11 +29,13 @@ def check_config(path: Path = CONFIG) -> dict:
     if path.is_symlink() or not path.is_file():
         raise ValueError('Falta wrangler.jsonc regular en la raíz del repositorio.')
     config = json.loads(path.read_text(encoding='utf-8'))
-    allowed = {'name', 'compatibility_date', 'assets'}
+    allowed = {'name', 'compatibility_date', 'assets', 'build'}
     if set(config) != allowed or config['name'] != 'fundamentos-ciberseguridad':
         raise ValueError('Configuración ajena al campus estático; revisa nombre y campos.')
     if config['assets'] != {'directory': './campus/dist', 'not_found_handling': '404-page'}:
         raise ValueError('Los activos deben ser campus/dist, sin backend ni bindings.')
+    if config['build'] != BUILD:
+        raise ValueError('Debe compilarse y validarse el campus antes de subir activos.')
     from datetime import date
     date.fromisoformat(config['compatibility_date'])
     return config
