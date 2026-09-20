@@ -39,3 +39,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Local Wrangler runtime/cache files are generated, never release inputs.
+/.wrangler/
