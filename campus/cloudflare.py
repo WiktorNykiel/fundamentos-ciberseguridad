@@ -15,6 +15,8 @@ import shutil
 import subprocess
 import sys
 from check_release import validate
+from publication import PUBLIC_BASE_PATH, PUBLIC_URL, PRODUCTION_ROUTES
+from stage_worker import stage, validate_staging
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -29,11 +31,15 @@ def check_config(path: Path = CONFIG) -> dict:
     if path.is_symlink() or not path.is_file():
         raise ValueError('Falta wrangler.jsonc regular en la raíz del repositorio.')
     config = json.loads(path.read_text(encoding='utf-8'))
-    allowed = {'name', 'compatibility_date', 'assets', 'build'}
+    allowed = {'name', 'compatibility_date', 'assets', 'build', 'routes', 'workers_dev', 'preview_urls'}
     if set(config) != allowed or config['name'] != 'fundamentos-ciberseguridad':
         raise ValueError('Configuración ajena al campus estático; revisa nombre y campos.')
-    if config['assets'] != {'directory': './campus/dist', 'not_found_handling': '404-page'}:
-        raise ValueError('Los activos deben ser campus/dist, sin backend ni bindings.')
+    if config['assets'] != {'directory': './campus/worker-dist', 'not_found_handling': '404-page'}:
+        raise ValueError('Los activos deben ser campus/worker-dist, sin backend ni bindings.')
+    if config['routes'] != PRODUCTION_ROUTES:
+        raise ValueError('La única ruta de producción admitida es la subruta pública del campus.')
+    if config['workers_dev'] is not True or config['preview_urls'] is not True:
+        raise ValueError('workers.dev y las URL de preview deben estar habilitados para verificar versiones.')
     if config['build'] != BUILD:
         raise ValueError('Debe compilarse y validarse el campus antes de subir activos.')
     from datetime import date
@@ -58,9 +64,10 @@ def execute(command: list[str], *, timeout: int = 900) -> None:
 def build_and_check() -> dict:
     check_config()
     execute([sys.executable, str(HERE/'build.py')])
-    report = validate(HERE/'dist', HERE/'pages-ready.zip')
+    validate(HERE/'dist', HERE/'pages-ready.zip')
     if not (HERE/'dist/404.html').is_file():
         raise ValueError('Falta la página 404 del campus.')
+    report = stage()
     print(json.dumps(report, ensure_ascii=False), flush=True)
     return report
 
@@ -68,16 +75,18 @@ def build_and_check() -> dict:
 def run(action: str) -> int:
     check_config()
     if action == 'plan':
-        print(json.dumps({'root': str(ROOT), 'assets': 'campus/dist',
+        print(json.dumps({'root': str(ROOT), 'assets': 'campus/worker-dist',
+            'publicUrl': PUBLIC_URL, 'publicBasePath': PUBLIC_BASE_PATH,
+            'productionRoutes': PRODUCTION_ROUTES, 'previewChangesRoutes': False,
             'wrangler': WRANGLER, 'publishes': False,
             'production': ['npx', *wrangler_args('deploy')],
             'preview': ['npx', *wrangler_args('preview')]}, ensure_ascii=False, indent=2))
         return 0
     if action == 'check':
-        print(json.dumps(validate(HERE/'dist', HERE/'pages-ready.zip'), ensure_ascii=False))
+        print(json.dumps(validate_staging(), ensure_ascii=False))
         return 0
-    build_and_check()
     if action == 'build':
+        build_and_check()
         return 0
     npx = shutil.which('npx')
     if not npx:
@@ -86,6 +95,9 @@ def run(action: str) -> int:
         print('Acción solicitada: publicar el campus en producción.', flush=True)
     elif action == 'preview':
         print('Acción solicitada: subir versión de prueba; no promover producción.', flush=True)
+    # Wrangler runs the checked custom build exactly once before processing assets.
+    # Do not build here as well: --no-bundle does not skip a custom build, and
+    # deploy / versions upload have no --no-build switch in the pinned CLI.
     execute([npx, *wrangler_args(action)])
     return 0
 

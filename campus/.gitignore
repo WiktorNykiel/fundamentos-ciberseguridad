@@ -1,4 +1,6 @@
 dist/
+worker-dist/
+.campus-worker-build-*
 qa/
 pages-ready.zip
 __pycache__/

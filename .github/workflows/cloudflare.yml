@@ -28,14 +28,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Build and validate without installing the legacy application
-        run: python3 campus/cloudflare.py build
       - name: Validate Wrangler configuration without upload
         shell: bash
         run: |
           set -o pipefail
           mkdir -p campus/qa
           python3 campus/cloudflare.py dry-run 2>&1 | tee campus/qa/wrangler-dry-run.log
+          python3 campus/cloudflare.py check
       - name: Exercise local Workers Static Assets runtime
         shell: bash
         run: |

@@ -14,6 +14,7 @@ from content import notes_and_quizzes
 from bilingual import collect_en
 from provenance import source_commit
 from release_inputs import public_kit_files
+from publication import not_found_page
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -274,7 +275,7 @@ def build() -> dict:
             shutil.copyfile(HERE/'assets'/name, stage/'assets'/name)
         page = read_text(HERE/'index.html')
         (stage/'index.html').write_text(page,encoding='utf-8')
-        (stage/'404.html').write_text('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>No encontrado · Campus</title><link rel="stylesheet" href="/assets/styles.css"></head><body class="print-reader"><main><h1>No se encontró ese archivo.</h1><p>Las secciones del campus se navegan desde el índice.</p><a href="/?lang=es#/temario">Abrir el temario completo</a><section lang="en"><h2>File not found.</h2><p>Use the course index to find a lesson.</p><a href="/?lang=en#/temario">Open the course index</a></section></main></body></html>',encoding='utf-8')
+        (stage/'404.html').write_text(not_found_page(),encoding='utf-8')
         (stage/'.assetsignore').write_text('.campus-generated\n',encoding='utf-8')
         (stage/'course.en.json').write_text(json.dumps(english,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
         (stage/'course.json').write_text(json.dumps(data,ensure_ascii=False,separators=(',',':')),encoding='utf-8')

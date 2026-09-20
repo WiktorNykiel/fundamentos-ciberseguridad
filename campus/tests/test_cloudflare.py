@@ -14,7 +14,9 @@ class CloudflareTests(unittest.TestCase):
         cfg=cloudflare.check_config()
         self.assertNotIn('main',cfg)
         self.assertNotIn('services',cfg)
-        self.assertEqual(cfg['assets']['directory'],'./campus/dist')
+        self.assertEqual(cfg['assets']['directory'],'./campus/worker-dist')
+        self.assertEqual(cfg['routes'],cloudflare.PRODUCTION_ROUTES)
+        self.assertTrue(cfg['workers_dev']);self.assertTrue(cfg['preview_urls'])
     def test_foreign_binding_rejected(self):
         with tempfile.TemporaryDirectory() as t:
             path=Path(t)/'wrangler.jsonc'; cfg=cloudflare.check_config()
@@ -41,8 +43,8 @@ class CloudflareTests(unittest.TestCase):
         self.assertIn('--dry-run',cloudflare.wrangler_args('dry-run'))
     def test_unknown_action_rejected(self):
         with self.assertRaises(ValueError):cloudflare.wrangler_args('exec arbitrary')
-    def test_failed_build_prevents_upload(self):
-        with patch.object(cloudflare,'build_and_check',side_effect=ValueError('bad release')):
+    def test_failed_config_prevents_wrangler(self):
+        with patch.object(cloudflare,'check_config',side_effect=ValueError('bad configuration')):
             with patch.object(cloudflare,'execute') as execute:
                 with self.assertRaises(ValueError):cloudflare.run('deploy')
                 execute.assert_not_called()
@@ -51,13 +53,13 @@ class CloudflareTests(unittest.TestCase):
             with patch.object(cloudflare,'execute') as execute:
                 self.assertEqual(cloudflare.run('build'),0)
                 build.assert_called_once();execute.assert_not_called()
-    def test_wrapper_validates_before_wrangler(self):
-        calls=[]
-        with patch.object(cloudflare,'build_and_check',side_effect=lambda:calls.append('validated')):
+    def test_wrapper_delegates_one_build_to_wrangler(self):
+        with patch.object(cloudflare,'build_and_check') as build:
             with patch.object(cloudflare.shutil,'which',return_value='/usr/bin/npx'):
-                with patch.object(cloudflare,'execute',side_effect=lambda command:calls.append(command)):
+                with patch.object(cloudflare,'execute') as execute:
                     cloudflare.run('preview')
-        self.assertEqual(calls[0],'validated');self.assertIn('versions',calls[1])
+        build.assert_not_called();execute.assert_called_once()
+        self.assertIn('versions',execute.call_args.args[0])
     def test_commands_never_use_shell(self):
         with patch.object(cloudflare.subprocess,'run') as run:
             cloudflare.execute(['python3','build.py'])

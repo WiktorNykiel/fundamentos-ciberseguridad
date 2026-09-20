@@ -34,6 +34,15 @@ class WorkersBuildHookTests(unittest.TestCase):
     def test_foreign_build_directory_rejected(self):
         self.check_invalid(lambda config: config['build'].update(cwd='src'))
 
+    def test_apex_capture_rejected(self):
+        self.check_invalid(lambda config: config.update(routes=[{'pattern':'smartkea.com/*','zone_name':'smartkea.com'}]))
+
+    def test_extra_route_rejected(self):
+        self.check_invalid(lambda config: config['routes'].append({'pattern':'smartkea.com/other/*','zone_name':'smartkea.com'}))
+
+    def test_custom_domain_rejected(self):
+        self.check_invalid(lambda config: config.update(routes=[{'pattern':'smartkea.com','custom_domain':True}]))
+
     def test_failed_compilation_never_validates_or_uploads(self):
         with patch.object(cloudflare, 'execute', side_effect=RuntimeError('build failed')) as execute:
             with patch.object(cloudflare, 'validate') as validate:
