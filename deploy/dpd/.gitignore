@@ -1,0 +1,12 @@
+node_modules/
+.wrangler/
+public/
+.dpd-build-*/
+__pycache__/
+*.pyc
+.env
+.env.*
+.dev.vars*
+test-results/
+playwright-report/
+evidence-private/
