@@ -1,0 +1,27 @@
+name: DPD worker checks (no deployment)
+on:
+  push:
+    paths: ['deploy/dpd/**', 'awesome-dpd/**', '.github/workflows/dpd-checks.yml']
+  pull_request:
+    paths: ['deploy/dpd/**', 'awesome-dpd/**', '.github/workflows/dpd-checks.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: dpd-checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Tests and build; no credentials or Cloudflare writes
+        working-directory: deploy/dpd
+        run: |
+          node --version
+          python3 --version
+          npm test
+          python3 build_assets.py
