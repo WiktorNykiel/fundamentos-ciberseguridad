@@ -1,0 +1,17 @@
+{
+  "name": "smartkea-introduccion-dpd-deploy",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=22"},
+  "scripts": {
+    "test": "node --test tests/*.test.mjs && python3 -m unittest discover -s tests -p 'test_*.py' -v",
+    "build": "python3 build_assets.py",
+    "dev": "wrangler dev --config wrangler.jsonc",
+    "dry-run": "wrangler deploy --dry-run --config wrangler.jsonc",
+    "preview": "wrangler deploy --config wrangler.jsonc",
+    "upload-version": "wrangler versions upload --config wrangler.jsonc",
+    "deploy": "wrangler deploy --config wrangler.jsonc --env production",
+    "smoke": "node smoke.mjs"
+  }
+}
