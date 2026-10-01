@@ -18,12 +18,16 @@ def source_commit(root: Path) -> str | None:
             return None
         ignored = subprocess.run(
             ['git', 'ls-files', '--others', '--ignored', '--exclude-standard', '-z', '--',
-             'formacion/sistemas-operativos', 'campus'], **options)
+             'formacion/sistemas-operativos', 'formacion/rutas', 'awesome-dpd', 'campus'], **options)
         for name in ignored.stdout.split('\0'):
             path = Path(name)
             parts = path.parts
             if '__pycache__' in parts:
                 continue
+            if name.startswith('awesome-dpd/site/'):
+                continue
+            if name.startswith(('formacion/rutas/', 'awesome-dpd/')):
+                return None
             # Conservative for course data; ignored local inputs must not be
             # attributed to HEAD. Generated campus output and test logs differ.
             if (name.startswith('formacion/sistemas-operativos/')
