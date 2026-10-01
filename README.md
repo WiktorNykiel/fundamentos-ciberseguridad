@@ -1,6 +1,10 @@
 # Fundamentos de ciberseguridad
 
-**Wiktor Nykiel · Campus 2.3 · Linux, Windows y macOS · Interfaz clara**
+> **Este campus se ha trasladado a SmartKEA.** El repositorio público mantenido es [smartkea-cyberinnovation/fundamentos-ciberseguridad](https://github.com/smartkea-cyberinnovation/fundamentos-ciberseguridad) y la web continúa en [smartkea.com/introduccion-ciberseguridad/](https://smartkea.com/introduccion-ciberseguridad/). Los contenidos actuales y sus futuras actualizaciones se encuentran en el nuevo repositorio. Este repositorio conserva el código anterior y su historial como referencia; la [nota de migración](https://github.com/smartkea-cyberinnovation/fundamentos-ciberseguridad/blob/main/docs/MIGRATION.md) documenta el snapshot trasladado y su alcance.
+
+**Wiktor Nykiel · Campus 2.3 · Linux, Windows y macOS · Español e inglés**
+
+Campus de SmartKEA: **https://smartkea.com/introduccion-ciberseguridad/**. El código público se conserva en [WiktorNykiel/fundamentos-ciberseguridad](https://github.com/WiktorNykiel/fundamentos-ciberseguridad).
 
 Aprende a comprender, administrar, automatizar, proteger e investigar sistemas. El curso combina teoría, terminal, prácticas guiadas y evidencias. Los materiales son públicos; las horas describen planificación, no una acreditación automática.
 
@@ -22,7 +26,9 @@ Es una **referencia de desarrollo**, no un nuevo catálogo activo ni horas adici
 
 ## Publicar sin confundir las aplicaciones
 
-Los logs recibidos corresponden a **Workers Builds**, que había autodetectado la aplicación Next.js de referencia. Para el Worker existente, configura raíz del repositorio, build command vacío, deploy `python3 campus/cloudflare.py deploy` y preview `python3 campus/cloudflare.py preview`; añade `SKIP_DEPENDENCY_INSTALL=1` y `PYTHON_VERSION=3.13`. El wrapper compila, valida y usa la configuración estática explícita. No necesita OpenNext ni un servicio `frontend`.
+El Worker `fundamentos-ciberseguridad` sirve únicamente la subruta del campus. Workers Builds usa la raíz del repositorio, build command vacío, deploy `python3 campus/cloudflare.py deploy` y preview `python3 campus/cloudflare.py preview`; las variables son `SKIP_DEPENDENCY_INSTALL=1`, `PYTHON_VERSION=3.13.3` y `NODE_VERSION=22.23.2`. El comando de Wrangler fijado ejecuta el build del campus, valida y monta los activos antes de subirlos. No necesita OpenNext ni un servicio `frontend`. La rama `main` activa producción; las demás ramas sólo suben versiones de prueba.
+
+Consulta [el procedimiento de publicación, comprobación y recuperación](campus/WORKERS-RECOVERY.md) para la arquitectura de subruta y los comandos reproducibles. Las rutas del campus y las reglas de redirección tienen una recuperación independiente de la versión del Worker.
 
 Para **Pages**, se mantiene la ruta independiente con raíz `campus`, build `python3 build.py && python3 check_release.py` y salida `dist`. [Configuración completa y diagnóstico](campus/DEPLOY-CLOUDFLARE.md).
 
